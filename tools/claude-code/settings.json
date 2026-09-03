@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(../private/**)",
+      "Edit(../private/**)",
+      "Bash(rm)",
+      "Bash(rm *)",
+      "Bash(rmdir *)",
+      "Bash(unlink *)",
+      "Bash(del *)",
+      "Bash(erase *)",
+      "Bash(find * -delete*)",
+      "Bash(find * -exec rm*)",
+      "Bash(git rm *)",
+      "Bash(git clean *)",
+      "Bash(git reset --hard*)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(rm *)",
+      "PowerShell(ri *)",
+      "PowerShell(del *)",
+      "PowerShell(erase *)",
+      "PowerShell(rd *)",
+      "PowerShell(rmdir *)",
+      "PowerShell(Clear-Content *)"
+    ]
+  }
+}

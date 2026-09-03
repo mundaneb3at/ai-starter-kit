@@ -1,0 +1,17 @@
+# Place this in your work\ folder if you use git there.
+# Keeps archives and anything secret-shaped out of version control.
+
+# Archived files (archive-don't-delete target)
+_archive/
+
+# Local secrets / credentials - never commit these
+.env
+*.secret
+*.key
+*.pem
+secrets.*
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
+.vscode/

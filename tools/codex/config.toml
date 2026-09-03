@@ -1,0 +1,39 @@
+# Codex CLI config  -  place this file at:  C:\Users\<you>\.codex\config.toml
+# Docs: https://developers.openai.com/codex/config-basic
+#
+# This config does two jobs that match the AGENTS.md rules:
+#   * file organization -> sandbox_mode anchors Codex to its launch folder
+#   * terminal usage     -> approval_policy + shell_environment_policy keep
+#                           commands safe and secrets out of the shell
+
+model = "gpt-5.5"                 # what your ChatGPT plan offers; run /model in the
+                                  #   Codex TUI to see the alternatives on your account
+model_reasoning_effort = "high"   # strong default; drop to "low"/"medium" for trivial
+                                  #   tasks, raise to "xhigh" for the hardest ones
+
+# --- File-organization boundary -------------------------------------------
+# workspace-write = Codex may read and write ONLY inside the folder it is
+# launched from. So: always launch Codex from your  work\  folder, and keep
+# anything private in a sibling  private\  folder OUTSIDE it.
+sandbox_mode = "workspace-write"
+
+# --- Terminal-usage safety ------------------------------------------------
+# How often Codex asks before running a command. Pick your comfort level:
+#   "untrusted"  = ask before almost everything            (most cautious, most prompts)
+#   "on-failure" = run in the sandbox, ask only if it fails
+#   "on-request" = the model decides when to ask           (recommended starting point)
+#   "never"      = never ask                               (only once you fully trust it)
+approval_policy = "on-request"
+
+# Give Codex's shell a clean, minimal environment and strip anything that looks
+# like a secret, so keys/tokens never end up in a command or a log.
+[shell_environment_policy]
+inherit = "core"
+exclude = ["*KEY*", "*SECRET*", "*TOKEN*", "*PASSWORD*", "OPENAI_*", "ANTHROPIC_*"]
+ignore_default_excludes = false   # keep Codex's own built-in secret filtering on too
+
+# --- Terminal display (optional) ------------------------------------------
+# Show useful badges in the Codex footer: current model, usage limits, and the
+# folder you're working in (a good reminder you're anchored in work\).
+[tui]
+status_line = ["model-with-reasoning", "five-hour-limit", "weekly-limit", "current-dir"]
