@@ -72,6 +72,8 @@ what your actual setup does, instead of trusting this paragraph.
 
 ## Setup
 
+Requires PowerShell 5.1+ (Windows 11 default) or PowerShell 7+.
+
 ### 1. Run the script
 From this kit's folder, in PowerShell:
 ```powershell
