@@ -72,8 +72,6 @@ what your actual setup does, instead of trusting this paragraph.
 
 ## Setup
 
-Requires PowerShell 5.1+ (Windows 11 default) or PowerShell 7+.
-
 ### 1. Run the script
 From this kit's folder, in PowerShell:
 ```powershell
@@ -95,7 +93,7 @@ prove it's actually reading `AGENTS.md`, run the boundary checks, and hand off t
 ### macOS / Linux
 No script ships for these yet (this kit is Windows-tested only). By hand: install Node.js + your
 AI tool via your package manager, create `work\projects\ work\_archive\` and a sibling
-`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md skills\` into `work\`, and place the
+`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md .gitignore skills\` into `work\`, and place the
 tool config per its own docs. Untested — if you hit something, please open an issue.
 
 ---

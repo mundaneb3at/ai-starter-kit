@@ -12,9 +12,12 @@ model_reasoning_effort = "high"   # strong default; drop to "low"/"medium" for t
                                   #   tasks, raise to "xhigh" for the hardest ones
 
 # --- File-organization boundary -------------------------------------------
-# workspace-write = Codex may read and write ONLY inside the folder it is
-# launched from. So: always launch Codex from your  work\  folder, and keep
-# anything private in a sibling  private\  folder OUTSIDE it.
+# workspace-write confines WRITES to the folder Codex is launched from -- it
+# does not confine reads (see AGENTS.md's File organization section: "the
+# sandbox stops it writing there and stops it starting there; it can still
+# read it if it wanders"). So: always launch Codex from your  work\  folder,
+# and keep anything private in a sibling  private\  folder OUTSIDE it -- that
+# boundary is a rule Codex follows, not a fence that blocks it reading there.
 sandbox_mode = "workspace-write"
 
 # --- Terminal-usage safety ------------------------------------------------

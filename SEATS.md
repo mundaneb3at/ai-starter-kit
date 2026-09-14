@@ -24,6 +24,8 @@ Executes one bounded task, reports honestly, then stops.
 - Reports one of: **done** (and how it was verified), **not done** (and why), or **needs manual
   check** (something it can't verify itself, e.g. a UI it can't see).
 - Doesn't need the full conversation history — just the task and enough context to do it.
+- Writes its report to its own file (`NOTES-builder.md` next to the work), never to the shared
+  `NOTES.md` — the Orchestrator folds it in (see `WORKFLOWS.md` → Continuity across sessions).
 
 ## Assignment table
 

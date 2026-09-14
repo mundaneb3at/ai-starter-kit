@@ -14,7 +14,6 @@
 #   <Base>\work\_archive\    <- archive-don't-delete target
 #   <Base>\private\          <- OUTSIDE work\. Never launch your AI tool here.
 #
-# ponytail: no PATH refresh after install — reopen PowerShell if `codex`/`claude` isn't found.
 
 param(
     [Parameter(Mandatory)]
@@ -40,6 +39,20 @@ Write-Host "Setting up ai-starter-kit under: $Base" -ForegroundColor Cyan
 # --- Step 1: folder layout -------------------------------------------------
 foreach ($d in $dirs) {
     if (Test-Path $d) {
+        # IA-004: Test-Path alone doesn't establish that $d is a real directory here -- a
+        # pre-existing reparse point (junction/symlink) at this path would pass the check, and
+        # every later Copy-Item into it would silently write through to wherever it redirects.
+        $existing = Get-Item -LiteralPath $d -Force
+        if ($existing.LinkType) {
+            Write-Error "  $d is a $($existing.LinkType) pointing elsewhere (target: $($existing.Target)) -- refusing to treat it as a plain folder. Move or remove the link first."
+            exit 1
+        }
+        # Flag E: a plain FILE here (LinkType is $null) passed the check above and would throw
+        # on the first Copy-Item into it later, mid-run, under $ErrorActionPreference='Stop'.
+        if (-not $existing.PSIsContainer) {
+            Write-Error "  $d already exists as a FILE, not a folder -- refusing to treat it as one. Move or remove the file first."
+            exit 1
+        }
         Write-Host ("  exists   " + $d) -ForegroundColor DarkGray
     } else {
         New-Item -ItemType Directory -Path $d | Out-Null
@@ -48,9 +61,17 @@ foreach ($d in $dirs) {
 }
 
 # --- Step 2: tool installs (skip anything already on PATH) -----------------
+# Flag E: winget installing a tool doesn't update this process's $env:Path, so the very next
+# `Get-Command`/npm call in this same run could throw CommandNotFound on a clean machine even
+# though the install just succeeded. Refresh from Machine+User after each install below.
+function Update-SessionPath {
+    $env:Path = [System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')
+}
+
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
     Write-Host "  installing Node.js LTS (winget)..." -ForegroundColor Yellow
     winget install --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+    Update-SessionPath
 } else {
     Write-Host "  exists   node" -ForegroundColor DarkGray
 }
@@ -58,6 +79,7 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Write-Host "  installing Git (winget)..." -ForegroundColor Yellow
     winget install --id Git.Git --accept-source-agreements --accept-package-agreements
+    Update-SessionPath
 } else {
     Write-Host "  exists   git" -ForegroundColor DarkGray
 }
@@ -81,7 +103,7 @@ if ($Tool -eq 'claude' -or $Tool -eq 'both') {
 }
 
 # --- Step 3: place instruction files + skills into work\ (only if absent) --
-foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md") {
+foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md", ".gitignore") {
     $src = Join-Path $PSScriptRoot $name
     $dst = Join-Path $work $name
     if (Test-Path $dst) {
@@ -96,13 +118,36 @@ foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md") {
 
 $skillsSrc = Join-Path $PSScriptRoot "skills"
 $skillsDst = Join-Path $work "skills"
-if (Test-Path $skillsDst) {
-    Write-Host ("  exists   " + $skillsDst + "  (left untouched)") -ForegroundColor DarkGray
-} elseif (Test-Path $skillsSrc) {
+if (-not (Test-Path $skillsSrc)) {
+    Write-Host "  NOTE: skills\ folder not found next to this script; copy it into work\ manually." -ForegroundColor Yellow
+} elseif (-not (Test-Path $skillsDst)) {
     Copy-Item $skillsSrc $skillsDst -Recurse
     Write-Host ("  placed   " + $skillsDst) -ForegroundColor Green
 } else {
-    Write-Host "  NOTE: skills\ folder not found next to this script; copy it into work\ manually." -ForegroundColor Yellow
+    # IA-003: skillsDst existing doesn't mean every skill subfolder does -- a rerun after an
+    # interrupted first install (or a newly-added skill in this kit) never backfilled the
+    # missing ones. Reconcile per-subfolder, same "only if absent" idempotence as the doc-files
+    # loop above.
+    Get-ChildItem -LiteralPath $skillsSrc -Directory | ForEach-Object {
+        $subDst = Join-Path $skillsDst $_.Name
+        if (Test-Path $subDst) {
+            Write-Host ("  exists   " + $subDst + "  (left untouched)") -ForegroundColor DarkGray
+        } else {
+            Copy-Item $_.FullName $subDst -Recurse
+            Write-Host ("  placed   " + $subDst) -ForegroundColor Green
+        }
+    }
+    # Flag E: the loop above is -Directory only, so a top-level file (e.g. skills\README.md)
+    # never gets backfilled on a partial install. Same reconciliation, -File this time.
+    Get-ChildItem -LiteralPath $skillsSrc -File | ForEach-Object {
+        $subDst = Join-Path $skillsDst $_.Name
+        if (Test-Path $subDst) {
+            Write-Host ("  exists   " + $subDst + "  (left untouched)") -ForegroundColor DarkGray
+        } else {
+            Copy-Item $_.FullName $subDst
+            Write-Host ("  placed   " + $subDst) -ForegroundColor Green
+        }
+    }
 }
 
 # --- Step 4: tool configs (only if absent — never overwrite yours) ---------

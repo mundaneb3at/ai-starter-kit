@@ -92,6 +92,13 @@ leave it something to read. So:
   `NOTES.md` next to the work.
 - Start the next session by pointing the AI at that file: *"read NOTES.md and
   continue."*
+- **One writer per shared file.** When two seats run at the same time (see
+  `SEATS.md`), each writes its own handoff — `NOTES-orchestrator.md`,
+  `NOTES-builder.md` — and the Orchestrator folds them into `NOTES.md` once the
+  work is done. Two tools editing the same file in the same minute overwrite
+  each other; nothing in this kit merges for you.
+- **Re-read before you write.** A session that read `NOTES.md` an hour ago is
+  editing a stale copy — read it again right before changing it.
 
 This is the cheapest way to make the assistant feel like it has a memory.
 
