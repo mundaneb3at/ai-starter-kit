@@ -23,6 +23,8 @@ electrical engineer trying AI coding for the first time.
 | `AGENTS.md` | your `work\` folder (root) | The rules your AI reads on launch. **The core file.** |
 | `CLAUDE.md` | your `work\` folder (root) | One line (`@AGENTS.md`) so Claude Code picks up the same rules. |
 | `WORKFLOWS.md` | your `work\` folder (root) | How the AI should approach multi-step work. Readable by you too. |
+| `WHY.md` | read it, don't install it | Why the kit is shaped this way, what it is NOT, the field-review history, and an FAQ. |
+| `HARNESS.md` | read it when one session isn't enough | The 15 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
 | `skills\` | your `work\` folder (root) | Reusable prompt-file skills the AI reads when a task matches one. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
@@ -90,6 +92,16 @@ codex        # or: claude
 Then say: *"read skills/setup-tutor/SKILL.md and walk me through it."* It'll check the folders,
 prove it's actually reading `AGENTS.md`, run the boundary checks, and hand off to `WORKFLOWS.md`.
 
+### If a project inside `work\` has its own `.git`
+Tools differ on whether they still see the rules file above it:
+- **Codex** walks up from your current folder only until it finds a project root (by default, a
+  folder containing `.git`) and never past it — so inside `work\projects\foo\` with its own repo,
+  `work\AGENTS.md` is not read. Keep a one-line `AGENTS.md` in that project pointing at the rules
+  (or launch from `work\`). Source: Codex config docs, `project_root_markers`.
+- **Claude Code** loads `CLAUDE.md` from the current folder and every folder above it to the
+  filesystem root, with no `.git` exception — the kit's one-line `CLAUDE.md` (`@AGENTS.md`) is
+  still found. Source: Claude Code memory docs.
+
 ### macOS / Linux
 No script ships for these yet (this kit is Windows-tested only). By hand: install Node.js + your
 AI tool via your package manager, create `work\projects\ work\_archive\` and a sibling
@@ -127,7 +139,8 @@ claim against real sources before trusting it).
 
 **4. Work like a team.** Read `WORKFLOWS.md` + the five workflow skills (`scope-first`,
 `debug-systematically`, `verify-before-done`, `document-and-handoff`, `safe-cleanup`), and
-`SEATS.md` for when to give a second tool a seat.
+`SEATS.md` for when to give a second tool a seat. When one session or one tool stops being
+enough — overnight work, several sessions, a session that has run too long — read `HARNESS.md`.
 
 **5. Share it.** See below.
 
@@ -155,3 +168,9 @@ The honest-wall claim above is backed by a live probe, not a guess: Codex's `wor
 sandbox mode was tested directly and confirmed to confine writes to the launch folder while
 still reading arbitrary paths outside it. `skills\primary-source\SKILL.md` has the discipline for
 running checks like this yourself on any tool or claim you don't want to take on faith.
+
+**Field review.** This kit was installed cold on a second person's Windows machine and reviewed by
+their AI (2026-09-07); 17 of its 27 findings were confirmed against live code and fixed, every
+verdict was re-derived independently, and the remaining proposals were refuted from three angles
+before being accepted or rejected. `WHY.md` § Field-review history lists what changed and what is
+still open on purpose.

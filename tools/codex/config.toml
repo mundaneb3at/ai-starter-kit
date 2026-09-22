@@ -6,10 +6,10 @@
 #   * terminal usage     -> approval_policy + shell_environment_policy keep
 #                           commands safe and secrets out of the shell
 
-model = "gpt-5.5"                 # what your ChatGPT plan offers; run /model in the
-                                  #   Codex TUI to see the alternatives on your account
-model_reasoning_effort = "high"   # strong default; drop to "low"/"medium" for trivial
-                                  #   tasks, raise to "xhigh" for the hardest ones
+# Model selection is deliberately NOT pinned here: Codex uses the default your account
+# supports, and model names retire. Run  /model  in the Codex TUI to see what your plan
+# offers and pick one per session. Only add  model = "..."  and
+# model_reasoning_effort = "low|medium|high|xhigh"  below if you are choosing on purpose.
 
 # --- File-organization boundary -------------------------------------------
 # workspace-write confines WRITES to the folder Codex is launched from -- it
