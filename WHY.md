@@ -47,7 +47,7 @@ run the probe yourself instead of believing this paragraph.
   the distilled idea of each piece, in `HARNESS.md`, so you can build your own version when one
   session and one tool stop being enough.
 - **Not a framework.** There is no runtime, no plugin, no package to update. It is a folder
-  layout, a rules file, two config files, and prompt files your AI reads when a task matches.
+  layout, a rules file, one small config file per tool, and prompt files your AI reads when a task matches.
 - **Not tool-specific.** Two tools were tested (Claude Code as Orchestrator, Codex as Builder).
   Anything that reads an `AGENTS.md`-style file on launch should work; that's an untested claim
   and the README says so.
@@ -84,11 +84,14 @@ run the probe yourself instead of believing this paragraph.
   (it was promised but never placed); the Codex config no longer pins a model; the nested-git note
   in the README; the boundary test in `setup-tutor` now has the human, not the AI, create the
   canary file in `private\`.
-- **Still open (deliberately).** Two items are designed but not built: the installer verifies an
-  install by *exit code* rather than by *outcome* (a benign non-zero from a package manager on
-  re-run can look fatal), and there is no shipped protocol for live-testing a tool's read-deny
-  rule against a fixture path. Both are documented rather than hidden. If you fix either, a PR is
-  welcome.
+- **Update pass (2026-09-26).** The two items left open above were closed: the installer now
+  checks each tool actually starts after installing it, and `setup-tutor` Step 4 now also tries
+  a terminal-command read of the canary and records the tool version. Also: a fresh PC's script
+  policy no longer stops npm-installed tools, the Codex approval menu drops a value current Codex
+  refuses, Claude Code installs natively, OpenCode and "no tool" options in `setup.ps1`, the
+  tracking templates placed by the installer, and `tutor` + `companion` skills.
+- **Still open.** Nothing designed is left unbuilt; the Codex half of the read-fence probe is
+  re-run whenever Codex changes its sandbox.
 
 ## FAQ
 

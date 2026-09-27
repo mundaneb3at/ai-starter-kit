@@ -7,34 +7,47 @@
 #   powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool both
 #   powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool codex
 #   powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool claude -Base "D:\ai-work"
+#   powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool opencode
+#   powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool none     # folders + files only, installs nothing
 #
 # Result:
 #   <Base>\work\            <- launch your AI tool from here (its sandbox root)
 #   <Base>\work\projects\
 #   <Base>\work\_archive\    <- archive-don't-delete target
+#   <Base>\work\handoffs\    <- one file per session, written at /close
+#   <Base>\work\TASKS.md, TODAY.md, MEMORY.md, memory\, templates\   <- the tracking files
 #   <Base>\private\          <- OUTSIDE work\. Never launch your AI tool here.
 #
 
 param(
     [Parameter(Mandatory)]
-    [ValidateSet('codex', 'claude', 'both')]
+    [ValidateSet('codex', 'claude', 'both', 'opencode', 'none')]
     [string]$Tool,
 
     [string]$Base = (Join-Path $env:USERPROFILE "Desktop")
 )
 
 $ErrorActionPreference = 'Stop'
+# A relative -Base (".\ai") would template a relative private path into the Claude Code config.
+$Base = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Base)
 
-$work    = Join-Path $Base "work"
+$work   = Join-Path $Base "work"
 $priv    = Join-Path $Base "private"
 $dirs = @(
     $work,
     (Join-Path $work "projects"),
     (Join-Path $work "_archive"),
+    (Join-Path $work "handoffs"),
     $priv
 )
 
 Write-Host "Setting up ai-starter-kit under: $Base" -ForegroundColor Cyan
+# The Desktop you see can live somewhere else (OneDrive backup moves it). Then work\ and
+# private\ would be created in a folder you never look at.
+$shownDesktop = [Environment]::GetFolderPath('Desktop')
+if ($Base -eq (Join-Path $env:USERPROFILE "Desktop") -and $shownDesktop -ne $Base) {
+    Write-Host "  NOTE: the Desktop you see is $shownDesktop (for example, backed up by OneDrive), so work\ and private\ will NOT show up there. They go in $Base. Pass -Base to pick another folder." -ForegroundColor Yellow
+}
 
 # --- Step 1: folder layout -------------------------------------------------
 foreach ($d in $dirs) {
@@ -68,52 +81,120 @@ function Update-SessionPath {
     $env:Path = [System.Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [System.Environment]::GetEnvironmentVariable('Path', 'User')
 }
 
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    Write-Host "  installing Node.js LTS (winget)..." -ForegroundColor Yellow
-    winget install --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+# G-02: an installer finishing only means it ran. Check the command actually works now.
+function Confirm-Installed([string]$Name, [string]$Hint = "install it by hand (see README)") {
     Update-SessionPath
-} else {
-    Write-Host "  exists   node" -ForegroundColor DarkGray
+    if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
+        Write-Error "  '$Name' still isn't available after installing it -- $Hint, then re-run this script."
+        exit 1
+    }
+    Write-Host ("  ok       " + $Name) -ForegroundColor Green
 }
 
-if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Host "  installing Git (winget)..." -ForegroundColor Yellow
-    winget install --id Git.Git --accept-source-agreements --accept-package-agreements
-    Update-SessionPath
+if ($Tool -eq 'none') {
+    Write-Host "  skipped  tool installs and tool configs (-Tool none)" -ForegroundColor DarkGray
 } else {
-    Write-Host "  exists   git" -ForegroundColor DarkGray
-}
-
-if ($Tool -eq 'codex' -or $Tool -eq 'both') {
-    if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
-        Write-Host "  installing @openai/codex (npm)..." -ForegroundColor Yellow
-        npm install -g @openai/codex
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host "  installing Node.js LTS (winget)..." -ForegroundColor Yellow
+        winget install --id OpenJS.NodeJS.LTS --accept-source-agreements --accept-package-agreements
+        Confirm-Installed node
     } else {
-        Write-Host "  exists   codex" -ForegroundColor DarkGray
+        Write-Host "  exists   node" -ForegroundColor DarkGray
+    }
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "  installing Git (winget)..." -ForegroundColor Yellow
+        winget install --id Git.Git --accept-source-agreements --accept-package-agreements
+        Confirm-Installed git
+    } else {
+        Write-Host "  exists   git" -ForegroundColor DarkGray
+    }
+
+    if ($Tool -eq 'codex' -or $Tool -eq 'both') {
+        if (-not (Get-Command codex -ErrorAction SilentlyContinue)) {
+            Write-Host "  installing @openai/codex (npm)..." -ForegroundColor Yellow
+            npm install -g @openai/codex
+            Confirm-Installed codex
+        } else {
+            Write-Host "  exists   codex" -ForegroundColor DarkGray
+        }
+    }
+
+    if ($Tool -eq 'claude' -or $Tool -eq 'both') {
+        if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+            # The vendor's recommended install (code.claude.com/docs/en/setup): a native claude.exe,
+            # so no .ps1 launcher for the script policy below to block.
+            Write-Host "  installing Claude Code (native installer)..." -ForegroundColor Yellow
+            Invoke-RestMethod https://claude.ai/install.ps1 | Invoke-Expression
+            Confirm-Installed claude "open a NEW PowerShell window and try 'claude --version'; if that fails, add $env:USERPROFILE\.local\bin to your PATH"
+        } else {
+            Write-Host "  exists   claude" -ForegroundColor DarkGray
+        }
+    }
+
+    if ($Tool -eq 'opencode') {
+        if (-not (Get-Command opencode -ErrorAction SilentlyContinue)) {
+            Write-Host "  installing opencode-ai (npm)..." -ForegroundColor Yellow
+            npm install -g opencode-ai
+            Confirm-Installed opencode
+        } else {
+            Write-Host "  exists   opencode" -ForegroundColor DarkGray
+        }
+    }
+
+    # --- Step 2b: let npm-installed tools start in a normal PowerShell window --
+    # npm installs each tool with a .ps1 launcher, and PowerShell picks the .ps1 first. A fresh
+    # Windows PC runs no .ps1 files at all (policy "Restricted"), so typing  codex  (or npm) fails
+    # with "running scripts is disabled on this system". If nothing else is set, allow local scripts
+    # for YOUR account only. Undo any time with:  Set-ExecutionPolicy -Scope CurrentUser Undefined
+    function Get-NormalPolicy {
+        # The policy a normal PowerShell window gets: the first scope that is set, skipping this
+        # script's own Process scope (Bypass). Nothing set anywhere = Restricted.
+        foreach ($s in 'MachinePolicy', 'UserPolicy', 'CurrentUser', 'LocalMachine') {
+            $v = Get-ExecutionPolicy -Scope $s
+            if ($v -ne 'Undefined') { return $v }
+        }
+        return 'Restricted'
+    }
+    if ((Get-NormalPolicy) -eq 'Restricted' -and (Get-ExecutionPolicy -Scope CurrentUser) -eq 'Undefined') {
+        # Under -ExecutionPolicy Bypass this can complain that a more specific scope overrides it,
+        # even when the setting was saved. The check below is what counts.
+        try { Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force } catch { }
+    }
+    $pol = Get-NormalPolicy
+    if ($pol -eq 'Restricted' -or $pol -eq 'AllSigned') {
+        Write-Host "  NOTE: PowerShell's script policy is $pol, so 'codex', 'opencode' and 'npm' may refuse to start ('running scripts is disabled'). Fix for your account: Set-ExecutionPolicy -Scope CurrentUser RemoteSigned" -ForegroundColor Yellow
+    } else {
+        Write-Host "  ok       PowerShell script policy for normal windows: $pol" -ForegroundColor Green
     }
 }
 
-if ($Tool -eq 'claude' -or $Tool -eq 'both') {
-    if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
-        Write-Host "  installing @anthropic-ai/claude-code (npm)..." -ForegroundColor Yellow
-        npm install -g @anthropic-ai/claude-code
-    } else {
-        Write-Host "  exists   claude" -ForegroundColor DarkGray
-    }
-}
-
-# --- Step 3: place instruction files + skills into work\ (only if absent) --
-foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md", ".gitignore") {
-    $src = Join-Path $PSScriptRoot $name
-    $dst = Join-Path $work $name
+# --- Step 3: place instruction files, skills and tracking files into work\ (only if absent) --
+# Copies $src to $dst unless $dst already exists (file or whole folder).
+function Copy-IfAbsent([string]$src, [string]$dst) {
     if (Test-Path $dst) {
         Write-Host ("  exists   " + $dst + "  (left untouched)") -ForegroundColor DarkGray
     } elseif (Test-Path $src) {
-        Copy-Item $src $dst
+        New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
+        Copy-Item $src $dst -Recurse
         Write-Host ("  placed   " + $dst) -ForegroundColor Green
     } else {
-        Write-Host ("  NOTE: " + $name + " not found next to this script; copy it into work\ manually.") -ForegroundColor Yellow
+        Write-Host ("  NOTE: " + $src + " not found next to this script; copy it into work\ manually.") -ForegroundColor Yellow
     }
+}
+
+foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md", ".gitignore") {
+    Copy-IfAbsent (Join-Path $PSScriptRoot $name) (Join-Path $work $name)
+}
+
+# The keeping-track files (AGENTS.md § Keeping track). Tool-agnostic, so placed for every -Tool.
+$tpl = Join-Path $PSScriptRoot "templates"
+foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md") {
+    Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work $name)
+}
+Copy-IfAbsent (Join-Path $tpl "memory") (Join-Path $work "memory")
+foreach ($name in "handoff.md", "card.md") {
+    Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work "templates\$name")
 }
 
 $skillsSrc = Join-Path $PSScriptRoot "skills"
@@ -126,27 +207,9 @@ if (-not (Test-Path $skillsSrc)) {
 } else {
     # IA-003: skillsDst existing doesn't mean every skill subfolder does -- a rerun after an
     # interrupted first install (or a newly-added skill in this kit) never backfilled the
-    # missing ones. Reconcile per-subfolder, same "only if absent" idempotence as the doc-files
-    # loop above.
-    Get-ChildItem -LiteralPath $skillsSrc -Directory | ForEach-Object {
-        $subDst = Join-Path $skillsDst $_.Name
-        if (Test-Path $subDst) {
-            Write-Host ("  exists   " + $subDst + "  (left untouched)") -ForegroundColor DarkGray
-        } else {
-            Copy-Item $_.FullName $subDst -Recurse
-            Write-Host ("  placed   " + $subDst) -ForegroundColor Green
-        }
-    }
-    # Flag E: the loop above is -Directory only, so a top-level file (e.g. skills\README.md)
-    # never gets backfilled on a partial install. Same reconciliation, -File this time.
-    Get-ChildItem -LiteralPath $skillsSrc -File | ForEach-Object {
-        $subDst = Join-Path $skillsDst $_.Name
-        if (Test-Path $subDst) {
-            Write-Host ("  exists   " + $subDst + "  (left untouched)") -ForegroundColor DarkGray
-        } else {
-            Copy-Item $_.FullName $subDst
-            Write-Host ("  placed   " + $subDst) -ForegroundColor Green
-        }
+    # missing ones. Reconcile per-subfolder AND per top-level file (Flag E: e.g. skills\README.md).
+    Get-ChildItem -LiteralPath $skillsSrc | ForEach-Object {
+        Copy-IfAbsent $_.FullName (Join-Path $skillsDst $_.Name)
     }
 }
 
@@ -169,12 +232,22 @@ if ($Tool -eq 'claude' -or $Tool -eq 'both') {
     } else {
         New-Item -ItemType Directory -Force (Split-Path $claudeDst) | Out-Null
         # ponytail: a relative Read/Edit(../private/**) deny pattern does not reliably block
-        # tool access (measured live, 2026-09) -- template the real absolute path in instead.
-        $privForward = $priv.Replace('\', '/')
+        # tool access (measured live, 2026-09) -- template the real absolute path in instead, in
+        # the //<drive>/... form Claude Code's docs give for an absolute path (C:\x -> //c/x).
+        $privForward = '//' + $priv.Substring(0, 1).ToLower() + $priv.Substring(2).Replace('\', '/')
         $settingsTemplate = Get-Content (Join-Path $PSScriptRoot "tools\claude-code\settings.json") -Raw
         $settingsTemplate = $settingsTemplate.Replace('../private/**', "$privForward/**")
         Set-Content -Path $claudeDst -Value $settingsTemplate -NoNewline
         Write-Host ("  placed   " + $claudeDst + "  (private-folder path templated in)") -ForegroundColor Green
+    }
+}
+
+if ($Tool -eq 'opencode') {
+    # OpenCode reads opencode.json and .opencode\commands\ from the folder it starts in.
+    $oc = Join-Path $PSScriptRoot "tools\opencode"
+    Copy-IfAbsent (Join-Path $oc "opencode.json") (Join-Path $work "opencode.json")
+    foreach ($name in "today.md", "close.md") {
+        Copy-IfAbsent (Join-Path $oc "commands\$name") (Join-Path $work ".opencode\commands\$name")
     }
 }
 

@@ -87,17 +87,20 @@ Read the full procedure in `skills\<name>\SKILL.md` when one applies.
 The AI starts each session fresh — it does not remember the last one unless you
 leave it something to read. So:
 
-- End a meaningful session with a short handoff (see `document-and-handoff`):
-  what changed, key decisions and why, and the next step. Save it as a
-  `NOTES.md` next to the work.
-- Start the next session by pointing the AI at that file: *"read NOTES.md and
-  continue."*
+- End a meaningful session with `/close` (or "close"): `document-and-handoff`
+  writes a dated handoff in `handoffs\` (what changed, key decisions and why, the
+  next step) and updates `TASKS.md`.
+- Start the next session by pointing the AI at it: *"read the newest handoff in
+  handoffs\ and continue."*
 - **One writer per shared file.** When two seats run at the same time (see
-  `SEATS.md`), each writes its own handoff — `NOTES-orchestrator.md`,
-  `NOTES-builder.md` — and the Orchestrator folds them into `NOTES.md` once the
-  work is done. Two tools editing the same file in the same minute overwrite
-  each other; nothing in this kit merges for you.
-- **Re-read before you write.** A session that read `NOTES.md` an hour ago is
+  `SEATS.md`), each writes its own handoff (the Builder adds `-builder` to its
+  slug), and only the Orchestrator edits `TASKS.md` and `MEMORY.md`, folding the
+  Builder's handoff in once the work is done. Two tools editing the same file in
+  the same minute overwrite each other; nothing in this kit merges for you.
+- **Commit only your own files.** When another seat may have staged something in
+  the same repo, commit by path: `git commit -m "..." -- <your files>` (with paths
+  given, only those are committed), then check with `git show --name-only HEAD`.
+- **Re-read before you write.** A session that read `TASKS.md` an hour ago is
   editing a stale copy — read it again right before changing it.
 
 This is the cheapest way to make the assistant feel like it has a memory.
@@ -126,7 +129,7 @@ A disciplined run looks like:
    `_archive\2026-06-07\` rather than deleting.
 4. **verify-before-done** — it lists the new structure and confirms no file was
    lost.
-5. **document-and-handoff** — it drops a one-paragraph `NOTES.md` recording the
-   new layout and why.
+5. **document-and-handoff** — it writes a short handoff in `handoffs\` recording
+   the new layout and why.
 
 Same loop, every task: understand, plan, small verified step, verify, iterate.

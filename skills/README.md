@@ -15,9 +15,11 @@ piece of work, with no two overlapping:
 | `document-and-handoff` | Capture | finishing or pausing a chunk of work |
 | `safe-cleanup` | Maintain | tidying or restructuring files |
 | `setup-tutor` | Onboard | verifying the kit's own setup, step by step |
-| `quiz-me` | Learn | the user wants to be tested on a concept, not handed the answer |
+| `tutor` | Learn | the user wants a whole study session on a topic: taught from zero if new, drilled if not, closed with what to practice |
+| `quiz-me` | Learn | one concept or question needs drilling (the tutor skill uses this for its hint ladder) |
 | `grill-me` | Decide | a plan or design needs pressure-testing before you build it |
 | `primary-source` | Trust | a claim or piece of advice needs checking against real sources |
+| `companion` | Watch | work is already running and the user wants a second session to watch it and answer questions |
 
 ## How to use them
 
@@ -30,4 +32,4 @@ piece of work, with no two overlapping:
 - **To remove one:** delete its folder (or archive it). Nothing else references
   it except the table in `AGENTS.md`.
 
-These nine are a starting set. Grow them as patterns repeat in your own work.
+These eleven are a starting set. Grow them as patterns repeat in your own work.

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "*": "deny"
+    },
+    "webfetch": "ask",
+    "bash": {
+      "*": "allow",
+      "rm *": "ask",
+      "del *": "ask",
+      "rmdir *": "ask",
+      "Remove-Item *": "ask",
+      "Clear-Content *": "ask",
+      "Format-*": "ask",
+      "git reset *": "ask",
+      "git clean *": "ask",
+      "git checkout -- *": "ask",
+      "git commit *": "ask",
+      "git push *": "ask"
+    }
+  }
+}

@@ -21,11 +21,11 @@
 sandbox_mode = "workspace-write"
 
 # --- Terminal-usage safety ------------------------------------------------
-# How often Codex asks before running a command. Pick your comfort level:
-#   "untrusted"  = ask before almost everything            (most cautious, most prompts)
-#   "on-failure" = run in the sandbox, ask only if it fails
+# How often Codex asks before running a command:
 #   "on-request" = the model decides when to ask           (recommended starting point)
 #   "never"      = never ask                               (only once you fully trust it)
+# Older guides also list "untrusted" and "on-failure": current Codex refuses to start with
+# "untrusted", and "on-failure" is deprecated. Don't use either.
 approval_policy = "on-request"
 
 # Give Codex's shell a clean, minimal environment and strip anything that looks

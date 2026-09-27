@@ -19,8 +19,7 @@ you don't feel the next problem yet.
   test that passed, a commit that exists — those are evidence. Every block below exists to move
   something from *said* to *on disk*.
 - **Verify the outcome, not the exit code.** A command returning 0 means it ran; check that the
-  thing it was supposed to produce is actually there. (The kit's own installer still gets this
-  wrong for package-manager re-runs — see `WHY.md` § Still open.)
+  thing it was supposed to produce is actually there.
 - **One writer per shared file.** Two sessions editing the same ledger corrupt it. Every shared
   surface has exactly one script or one session that writes it; everyone else reads.
 
@@ -47,7 +46,7 @@ you don't feel the next problem yet.
 - **Problem:** a task described in chat is gone when the session is.
 - **Minimal:** one Markdown file per job: a STATUS block at the top (model, effort, date, state),
   the task, a **STOP LINE** (what makes the session stop and hand back), and a **DONE-WHEN** naming
-  an absolute path that must exist at the end.
+  an absolute path that must exist at the end. Starting shape: `templates\card.md`.
 - **Failure it stops:** a session "finishing" with nothing on disk; two sessions running the same
   job because neither could see the other's state.
 - **Watch for:** a DONE-WHEN satisfied by an *empty* or *stub* file. Existence is not completion.
@@ -59,6 +58,10 @@ you don't feel the next problem yet.
   chosen model and effort *into the card*, appends one row to a dispatch log, then starts the tool
   with "read this card and run it." Model and effort are mandatory arguments — no silent default.
 - **Failure it stops:** "which model ran this?" being unanswerable; a lane started twice.
+- **Watch for:** leftovers. If each job gets its own terminal session (tmux or similar), the empty
+  shell it started in stays open after the job ends, and after a busy day you can't tell live jobs
+  from dead ones. Make cleanup the launcher's last step: when the job exits, close its session,
+  but only if nobody is viewing it and nothing else is still running in it.
 
 ## 6. Queue + custodian loop
 - **Problem:** ten cards to run overnight, in phases, with a machine that has limited RAM and a

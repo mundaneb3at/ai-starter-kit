@@ -64,6 +64,12 @@ Your AI runs shell commands to do real work. These rules keep that safe.
   operators — chain with `; if ($?) { ... }` instead. Quote any path that
   contains spaces.
 
+- **Two more PowerShell 5.1 traps.** `>` and `>>` write UTF-16, which silently breaks
+  plain-text files like `.gitignore` or `.env`; use `Add-Content -Encoding utf8` or
+  `Set-Content -Encoding utf8`. For a commit message with quotes or several lines, write it to a
+  file and run `git commit -F <file>`, because PowerShell 5.1 can split a quoted `-m "..."` into
+  separate arguments.
+
 - **Destructive commands require explicit confirmation first.** Before running
   anything that deletes, overwrites, or is hard to undo —
   `Remove-Item -Recurse -Force`, `Format-*`, `git reset --hard`, `git clean`,
@@ -114,6 +120,37 @@ Full list + non-redundancy table: `skills\README.md`.
 | about to be called "done" | `verify-before-done` |
 | finishing or pausing a chunk of work | `document-and-handoff` |
 | tidying or restructuring files | `safe-cleanup` |
+| the user says "close" / "wrap up" / runs `/close` | `document-and-handoff` (handoff + TASKS + memory) |
+| the user says "what's today" / runs `/today` | read the four files in "Keeping track" below, propose at most 3 |
+
+---
+
+## Keeping track
+
+_These files live at the top of `work\` (starting copies in the kit's `templates\`). If one is
+missing, carry on without it and offer to create it once. Don't nag._
+
+- **Session start:** read `TODAY.md`, `TASKS.md`, `MEMORY.md` (the index, not every memory
+  file), and the newest file in `handoffs\`. Open a `memory\` file only when it matters for the
+  task. Say in one line where things stand, then do what the user asked.
+- **Was it solved already?** Before a non-trivial task, search `handoffs\` and `MEMORY.md` for
+  the topic and say what you found (or "nothing earlier") before starting.
+- **Session end:** `/close` (or "close" / "wrap up"). This runs `skills\document-and-handoff`:
+  a dated handoff in `handoffs\`, `TASKS.md` updated, durable facts saved to `memory\`.
+- **Memory rules:**
+  - One fact per file in `memory\`, with one index line in `MEMORY.md`.
+  - Update the existing file. Never add a near-duplicate; search `MEMORY.md` first.
+  - Save only what changes future behaviour (a preference, a correction, a standing decision,
+    where something lives). Today-only details go in the handoff.
+  - A fact that turns out wrong gets archived and its index line removed.
+  - `MEMORY.md` is read every session, so keep it short: past ~50 lines, merge or archive
+    entries before adding one.
+  - Nothing private in memory or handoffs (passwords, health, money). That stays in `private\`.
+- **Dates:** read the clock for today's date; never guess it. When writing down "Friday" or "tomorrow", write the
+  actual date instead. Work out weekdays and "in N days" with a command
+  (`(Get-Date).AddDays(10)`, `(Get-Date '2026-03-02').DayOfWeek`), never in your head.
+- **TASKS.md is the list; TODAY.md is today's slice of it.** Add new tasks to TASKS.md, never
+  only to chat.
 
 ---
 

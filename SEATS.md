@@ -10,7 +10,8 @@ Plans the work, breaks it into bounded tasks, hands one task to a Builder, then 
 the result itself** before accepting it — never takes the Builder's own "done" at face value.
 
 - Owns architecture and hard decisions.
-- Writes the task description a Builder can execute without guessing.
+- Writes the task description a Builder can execute without guessing (`templates\card.md` is
+  the shape).
 - After a Builder reports back, actually checks the claim (run it, read the diff, re-test) —
   see `skills\verify-before-done\SKILL.md`.
 - Talks to the user; the Builder doesn't have to.
@@ -24,8 +25,20 @@ Executes one bounded task, reports honestly, then stops.
 - Reports one of: **done** (and how it was verified), **not done** (and why), or **needs manual
   check** (something it can't verify itself, e.g. a UI it can't see).
 - Doesn't need the full conversation history — just the task and enough context to do it.
-- Writes its report to its own file (`NOTES-builder.md` next to the work), never to the shared
-  `NOTES.md` — the Orchestrator folds it in (see `WORKFLOWS.md` → Continuity across sessions).
+- Writes its report to its own handoff (`handoffs\YYYY-MM-DD-<slug>-builder.md`), never to the
+  shared `TASKS.md` or `MEMORY.md` — the Orchestrator folds it in (see `WORKFLOWS.md` →
+  Continuity across sessions).
+
+## Companion (optional)
+
+Watches work that is already running and answers questions about it. It never builds, never
+plans, never kills or restarts anything.
+
+- Reads what it needs inside `work\`; writes only its own notes file.
+- Every status it gives comes from a check it ran just now, not from memory or from the job's own
+  "done".
+- Add it the first time you leave a long job running and want to ask about it from elsewhere.
+  How: `skills\companion\SKILL.md`.
 
 ## Assignment table
 

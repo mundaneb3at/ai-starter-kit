@@ -28,6 +28,8 @@ electrical engineer trying AI coding for the first time.
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
 | `skills\` | your `work\` folder (root) | Reusable prompt-file skills the AI reads when a task matches one. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
+| `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands and web fetches) plus `/today` and `/close` commands. |
+| `templates\` | your `work\` folder (`setup.ps1` places them) | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, and a one-job card — the "Keeping track" files `AGENTS.md` describes. Work with any tool. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
 | `setup.ps1` | run once from PowerShell | Builds the folder layout, installs your chosen tool(s), and drops the config files in place. Safe + idempotent. |
 | `.gitignore` | your `work\` folder (root) | Keeps archives and secrets out of version control if you use git. |
@@ -69,26 +71,38 @@ with that config installed — it is not a property of sandboxed AI tools in gen
 survive a hand-edited config or a different tool, and it says nothing about writes on other
 tools. `skills\setup-tutor\SKILL.md` walks you through running this probe yourself so you know
 what your actual setup does, instead of trusting this paragraph.
+Re-measured 2026-09-26 on Claude Code 2.1.283: with the templated rule in place, the file-read
+tool, a Bash `cat` and a PowerShell `Get-Content` of a canary in `private\` were all denied;
+with the rule removed, all three read it.
 
 ---
 
 ## Setup
 
 ### 1. Run the script
+Requires PowerShell 5.1+ (Windows 11 default) or PowerShell 7+.
+
 From this kit's folder, in PowerShell:
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool both
 ```
-(`-Tool codex`, `-Tool claude`, or `-Tool both`.) This installs Node.js/Git if missing, installs
-your chosen AI tool(s), builds `work\`, `work\projects\`, `work\_archive\`, and the sibling
-`private\`, copies the rule files and skills into `work\`, and drops the tool config(s) into
-place — only where nothing already exists.
+(`-Tool codex`, `-Tool claude`, `-Tool both`, `-Tool opencode`, or `-Tool none` to build the
+folders and files only and install nothing.) This installs Node.js/Git if missing, installs
+your chosen AI tool(s) and checks each one actually starts, builds `work\`, `work\projects\`,
+`work\_archive\`, `work\handoffs\` and the sibling `private\`, copies the rule files, skills and
+tracking files into `work\`, and drops the tool config(s) into place — only where nothing
+already exists.
 
 ### 2. Launch and verify
 ```powershell
-cd "$env:USERPROFILE\Desktop\work"
-codex        # or: claude
+cd "<the work folder setup.ps1 printed at the end>"   # default: $env:USERPROFILE\Desktop\work
+codex        # or: claude, opencode
 ```
+If `codex` (or `npm`) answers *"running scripts is disabled on this system"*, Windows is still on
+its default script policy. `setup.ps1` normally fixes this for your account; if it couldn't, run
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once (undo: `Set-ExecutionPolicy -Scope
+CurrentUser Undefined`). Microsoft's explanation: `about_Execution_Policies`.
+
 Then say: *"read skills/setup-tutor/SKILL.md and walk me through it."* It'll check the folders,
 prove it's actually reading `AGENTS.md`, run the boundary checks, and hand off to `WORKFLOWS.md`.
 
@@ -105,8 +119,17 @@ Tools differ on whether they still see the rules file above it:
 ### macOS / Linux
 No script ships for these yet (this kit is Windows-tested only). By hand: install Node.js + your
 AI tool via your package manager, create `work\projects\ work\_archive\` and a sibling
-`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md .gitignore skills\` into `work\`, and place the
+`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md .gitignore skills\` and the `templates\` files into `work\`, and place the
 tool config per its own docs. Untested — if you hit something, please open an issue.
+
+### Known Windows issue: slowdown after days without a restart
+On Windows 11 build 26200 (25H2) there is a Windows bug that leaks a small kernel object when
+programs start other programs, and AI coding tools start a lot of short-lived commands. If
+starting commands gets noticeably slower after a few days of uptime, **restart**: that clears
+it. An optional per-user registry workaround (`ForegroundLockTimeout` = 0) stops the leak, at
+the cost of letting any app take focus from the window you're typing in. The exact steps and the
+undo are in the source: [github.com/bentoner/windows-token-leak](https://github.com/bentoner/windows-token-leak).
+Microsoft had not shipped a fix when this was written (2026-09).
 
 ---
 
@@ -119,6 +142,13 @@ Any other tool that reads an `AGENTS.md`-style rules file on launch (Cursor, Git
 Gemini CLI, and others each document their own equivalent) should work per its own docs — that's
 an untested claim here, not a verified one. If you get one working, a PR adding it to this table
 is welcome.
+
+### Using OpenCode
+
+OpenCode reads `AGENTS.md` natively, so the rules work as-is. `setup.ps1 -Tool opencode`
+installs it and places the config and the `/today` and `/close` commands in `work\`;
+`tools\opencode\README.md` says what each file does, how OpenCode finds skills, and which lines
+were live-tested (and on which version).
 
 ---
 
@@ -133,14 +163,16 @@ through it."*
 `WORKFLOWS.md`. One example project built this way:
 [`github.com/mundaneb3at/sim-maker-kit`](https://github.com/mundaneb3at/sim-maker-kit).
 
-**3. Learn while building.** `quiz-me` (drill any concept cold instead of being handed the
-answer), `grill-me` (pressure-test a plan before you commit to it), `primary-source` (check a
+**3. Learn while building.** `tutor` (a whole study session on any topic, taught from zero if
+it's new to you), `quiz-me` (drill one concept cold instead of being handed the answer), `grill-me` (pressure-test a plan before you commit to it), `primary-source` (check a
 claim against real sources before trusting it).
 
 **4. Work like a team.** Read `WORKFLOWS.md` + the five workflow skills (`scope-first`,
 `debug-systematically`, `verify-before-done`, `document-and-handoff`, `safe-cleanup`), and
 `SEATS.md` for when to give a second tool a seat. When one session or one tool stops being
 enough — overnight work, several sessions, a session that has run too long — read `HARNESS.md`.
+Leaving a long job running and want to ask about it from elsewhere? `skills\companion\SKILL.md`
+sets up a second session that watches it and tells you when to act, and never touches it.
 
 **5. Share it.** See below.
 
@@ -159,6 +191,18 @@ When something you built is worth sharing:
 4. Push it: `gh repo create <you>/<name> --public --source . --push` (or the GitHub website).
 5. Clone it fresh somewhere else and confirm it actually works from a clean checkout — that's the
    only real test that nothing local was silently required.
+
+---
+
+## Updating this kit
+
+Newer versions live at
+[`github.com/mundaneb3at/ai-starter-kit`](https://github.com/mundaneb3at/ai-starter-kit).
+`setup.ps1` never overwrites, so re-running it won't bring changes in. To take an update:
+download or `git pull` the kit into its own folder (never into `work\`), read what changed
+(`git log --stat`), and copy the changed files into `work\` by hand. For `AGENTS.md`, merge the
+new lines into your edited copy; don't replace it. Then re-run the boundary checks in
+`skills\setup-tutor\SKILL.md` Step 4.
 
 ---
 
