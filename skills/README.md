@@ -20,6 +20,7 @@ piece of work, with no two overlapping:
 | `grill-me` | Decide | a plan or design needs pressure-testing before you build it |
 | `primary-source` | Trust | a claim or piece of advice needs checking against real sources |
 | `companion` | Watch | work is already running and the user wants a second session to watch it and answer questions |
+| `write-a-card` | Hand off | a job should run in another session: decide it's ready, ground it, settle decisions, write `templates\card.md`, check it |
 
 ## How to use them
 
@@ -32,4 +33,4 @@ piece of work, with no two overlapping:
 - **To remove one:** delete its folder (or archive it). Nothing else references
   it except the table in `AGENTS.md`.
 
-These eleven are a starting set. Grow them as patterns repeat in your own work.
+These twelve are a starting set. Grow them as patterns repeat in your own work.

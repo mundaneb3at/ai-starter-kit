@@ -193,7 +193,7 @@ foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md") {
     Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work $name)
 }
 Copy-IfAbsent (Join-Path $tpl "memory") (Join-Path $work "memory")
-foreach ($name in "handoff.md", "card.md") {
+foreach ($name in "handoff.md", "card.md", "fundamentals.jsonl") {
     Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work "templates\$name")
 }
 

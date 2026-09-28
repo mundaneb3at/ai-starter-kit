@@ -50,6 +50,19 @@ plans, never kills or restarts anything.
 **Tested pairing:** Claude Code (Orchestrator) + Codex (Builder), tested 2026-09 on Windows 11.
 Any other tool combination follows the same seat contract per its own docs — untested here.
 
+## Which model runs a card
+
+Give a card to your normal strong model, the one you use every day. Move up to the top-tier model
+(the most expensive one your tool offers) only when you choose it on purpose, or when the same card
+already fell short on the normal one run at its highest effort setting (effort = how long the model
+thinks before answering). Why this is here: "the most expensive model is the safest pick" is the
+usual guess, and it lost the one test behind this rule. On a review task, a third model checked
+both sets of claims without knowing which model wrote which. It kept 10 of 12 of the normal strong
+model's claims and 6 of 13 of the top tier's, and the normal model cost about a third as much.
+That was a single run of a single test: one example, not a measurement, so check it again when
+your tool ships new models. How to route a card:
+`skills\write-a-card\SKILL.md` Step 0.
+
 ## Adding a lane
 
 Once you're running two or more tools and want a permanent second seat:

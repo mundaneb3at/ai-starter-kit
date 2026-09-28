@@ -24,12 +24,13 @@ electrical engineer trying AI coding for the first time.
 | `CLAUDE.md` | your `work\` folder (root) | One line (`@AGENTS.md`) so Claude Code picks up the same rules. |
 | `WORKFLOWS.md` | your `work\` folder (root) | How the AI should approach multi-step work. Readable by you too. |
 | `WHY.md` | read it, don't install it | Why the kit is shaped this way, what it is NOT, the field-review history, and an FAQ. |
-| `HARNESS.md` | read it when one session isn't enough | The 15 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
+| `HARNESS.md` | read it when one session isn't enough | The 17 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
 | `skills\` | your `work\` folder (root) | Reusable prompt-file skills the AI reads when a task matches one. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
 | `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands and web fetches) plus `/today` and `/close` commands. |
-| `templates\` | your `work\` folder (`setup.ps1` places them) | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, and a one-job card — the "Keeping track" files `AGENTS.md` describes. Work with any tool. |
+| `templates\` | your `work\` folder (`setup.ps1` places them) | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. Work with any tool. |
+| `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for running cards unattended: each card gets its own terminal session, the card declares when it is done, a watcher checks its Done-when file and closes the session. Start with its README and `selftest.ps1`. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
 | `setup.ps1` | run once from PowerShell | Builds the folder layout, installs your chosen tool(s), and drops the config files in place. Safe + idempotent. |
 | `.gitignore` | your `work\` folder (root) | Keeps archives and secrets out of version control if you use git. |

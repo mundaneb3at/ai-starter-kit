@@ -46,7 +46,8 @@ you don't feel the next problem yet.
 - **Problem:** a task described in chat is gone when the session is.
 - **Minimal:** one Markdown file per job: a STATUS block at the top (model, effort, date, state),
   the task, a **STOP LINE** (what makes the session stop and hand back), and a **DONE-WHEN** naming
-  an absolute path that must exist at the end. Starting shape: `templates\card.md`.
+  the exact full path of a file that must exist at the end. Starting shape: `templates\card.md`; how to fill
+  it in: `skills\write-a-card\SKILL.md`.
 - **Failure it stops:** a session "finishing" with nothing on disk; two sessions running the same
   job because neither could see the other's state.
 - **Watch for:** a DONE-WHEN satisfied by an *empty* or *stub* file. Existence is not completion.
@@ -83,6 +84,11 @@ you don't feel the next problem yet.
 - **Failure it stops:** this was rebuilt three times before the rule stuck — each time a matcher
   keyed on a *name pattern* missed the next batch of sessions named differently, and they sat
   "idle" for hours.
+- **Watch for:** the step that closes a finished session racing the step that cleans up after it.
+  If the closer finds the session's window already gone, read the sentinel file before calling it
+  a failure: gone *after* a written "closed" is a success. A session that goes quiet for a moment
+  mid-close has not finished; wait for the tool's own "finished" text. And a declaration you set
+  aside as failed needs a time when it is tried again, or nothing ever reads it again.
 
 ## 8. Close / handoff ritual
 - **Problem:** a session ends and the next one starts from zero.
@@ -157,6 +163,36 @@ you don't feel the next problem yet.
   any work that feels familiar.
 - **Public piece:** `session-backbone` (turns session transcripts into auditable ledgers).
 
+## 16. Fundamentals register (every number has its reason on file)
+- **Problem:** a harness fills up with tuned numbers (how many jobs run at once, the quota level
+  where launches pause, a memory budget) and rules (which model runs which job). Months later
+  nobody knows why a number is 3 and not 6, two scripts hold different values for the same
+  setting, and a failing check gets "fixed" by quietly raising its expected value.
+- **Minimal:** one file with one line per number or rule (`templates\fundamentals.jsonl` has three
+  example lines). Each line records the value; **where it lives in the code** (a file, plus a
+  search pattern that must find that value exactly once); its **basis** (your ruling with your
+  words quoted, a measurement with the command that measures it, a single test, a vendor claim,
+  an outside standard, or honestly "unbacked"); the day it was last checked; and **why it last
+  changed**. A small script re-reads the code and goes red when the code's value differs from the
+  file, two places disagree, a value changed with no new reason, or a recheck is overdue.
+  "Unbacked" lines count as debt, never red, so the list can start honest instead of noisy.
+- **Failure it stops:** one setting with two values nobody reconciled (one script said 3, another
+  said 6); a budget raised inside an automatic commit with no reason written anywhere.
+- **Watch for:** the register becoming a chore. Add a number only if a script reads it or a rule
+  depends on it, and removing it would cause a mistake. Everything else stays in the code.
+
+## 17. Right-now reminders
+- **Problem:** the rules that matter most (check the result, don't guess, stop when stuck) sit at
+  the top of a session that has since grown very long, and they stop steering it, usually just
+  when things are going wrong.
+- **Minimal:** five or fewer one-line rules the AI shows at the top of its first reply (`AGENTS.md`
+  → Right-now rules, in this kit). Harness version: keep the list in one marked block of one file,
+  and add a hook that runs on every message you send and re-shows the list on every fifth one.
+- **Failure it stops:** a rule that is written down but not in front of anyone when the decision
+  is made.
+- **Watch for:** the list growing. Past about six lines nobody reads it; reword a rule instead of
+  adding one.
+
 ---
 
 ## Where public pieces already exist
@@ -174,8 +210,10 @@ All under the same GitHub account as this kit. Each README states what it was te
 
 ## The order to build in
 
-1. Blocks 1–3 are this kit. 2. Block 4 (cards) the first time you want to hand a job to a second
+1. Blocks 1–3 are this kit, and so is the minimal version of block 17 (add its re-show hook the
+first time your sessions run long). 2. Block 4 (cards) the first time you want to hand a job to a second
 session. 3. Blocks 5, 8 (launcher, close) the first time you run two jobs in a day. 4. Blocks 7, 6,
 10, 9 (declaration, loop, quota gate, rotation) the first time you want work done while you sleep —
 in that order, and each with a fixture test before it runs unattended. 5. Blocks 11, 13, 14, 15
-once the harness is big enough that you can no longer see it all at once.
+once the harness is big enough that you can no longer see it all at once. 6. Block 16 once you
+have tuned more than a handful of numbers.

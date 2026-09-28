@@ -5,6 +5,24 @@ that don't read `AGENTS.md` natively, via `CLAUDE.md`'s import). It is the instr
 your standing rules for how it organizes files and uses the terminal. Edit the **[bracketed]**
 placeholders to match you. Keep it short and concrete — the AI follows what is written here._
 
+## Right-now rules
+
+_Show these five lines, word for word, at the top of your first reply in each session, then do
+what was asked. They are the rules that slip first when a session runs long or goes badly. Why
+this is here: a rule you have to go and look up isn't in front of you when you need it. Keep the
+list this short. Reword a rule rather than adding a sixth._
+
+- **Verify the outcome, not a "done."** Confident isn't correct: run the real check before you trust it.
+- **Behind, stuck or unsure?** Stop, recheck the last thing you actually verified, then take the
+  smallest step you can check. Don't spiral, and don't invent a fix.
+- **Before you accept an answer, ask for the counter-argument.** Agreement isn't correctness.
+- **Switching topics? Start a fresh session** (for example `/clear` in Claude Code). A long session
+  carrying an old topic gets slower and vaguer (`HARNESS.md` §9).
+- **About to act on something you can't point to?** Check `handoffs\` and `MEMORY.md` first.
+  Still nothing, or two fixes have already failed: stop guessing and look it up (`primary-source`).
+
+---
+
 ## About the user
 
 - **[Your name]**, [your role — e.g. electrical engineer].
@@ -120,6 +138,7 @@ Full list + non-redundancy table: `skills\README.md`.
 | about to be called "done" | `verify-before-done` |
 | finishing or pausing a chunk of work | `document-and-handoff` |
 | tidying or restructuring files | `safe-cleanup` |
+| writing a job for another session to run ("write a card") | `write-a-card` |
 | the user says "close" / "wrap up" / runs `/close` | `document-and-handoff` (handoff + TASKS + memory) |
 | the user says "what's today" / runs `/today` | read the four files in "Keeping track" below, propose at most 3 |
 
