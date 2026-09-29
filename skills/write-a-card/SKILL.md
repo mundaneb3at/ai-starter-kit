@@ -62,6 +62,9 @@ Copy `templates\card.md` to `cards\YYYY-MM-DD-<slug>.md` and fill in every headi
 - **Read only:** exact paths. Never "search everything".
 - **Do:** numbered steps, each small enough to check.
 - **Done when:** the exact full path of a file that must exist at the end, and what must be in it.
+  Keep prose out of this section: a checker (such as the advanced lane's `done-when.ps1`) treats
+  every line that is not a path as a missing file, so an explanation there stops the card closing.
+  Put explanations under Stop line. Never leave it empty: a checker with no path to test either passes the card without checking anything or refuses it.
 - **Stop line:** a time limit, the questions only the user can answer, anything outside Read only.
 - **Close:** a handoff, Status updated, and the start line of the next card if there is one.
 

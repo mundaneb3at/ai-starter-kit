@@ -21,7 +21,9 @@ state: draft / ready / running / done / stopped. The session running the card up
 
 ## Done when
 <!-- A file or result that must exist at the end, by its exact full path. "It said done" doesn't count,
-and neither does an empty or placeholder file at that path. -->
+and neither does an empty or placeholder file at that path. Put only paths here, one per line: a
+checker counts any other line as a file that never appears, so the card can never close. Explanations
+go under Stop line. Never leave it empty: a checker with no path to test either passes the card without checking anything or refuses to run it. -->
 
 ## Stop line
 <!-- When to stop and hand back: a time limit, a question only you can answer, anything outside

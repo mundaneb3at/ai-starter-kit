@@ -1,0 +1,25 @@
+{
+  "_comment": "Optional. Merge the hooks block into your own settings.json (this file is an example, not a replacement). First copy the two scripts from tools/claude-code/hooks/ into the hooks folder inside your .claude folder, then replace <you> with your Windows user name in both commands. An absolute path is the tested form. The permissions block in settings.json is unchanged and not repeated here.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\<you>\\.claude\\hooks\\rules-reshow.ps1\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\Users\\<you>\\.claude\\hooks\\ps51-command-gate.ps1\""
+          }
+        ]
+      }
+    ]
+  }
+}

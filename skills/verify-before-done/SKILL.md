@@ -19,5 +19,8 @@ false "done" costs far more than an honest "not yet."
 
 ## The rule
 
+A fix is not verified until its test has been seen to **fail** against the unfixed code. A test
+that passes both before and after the change proves nothing about the change.
+
 "Needs manual verification" is a valid, honest status — say it when it's true.
 A confident "done" on untested work is not acceptable.

@@ -56,6 +56,10 @@ never go.
   financial, medical, client-confidential, or any file containing credentials, API keys, or
   identity details. If you are about to create such a file in `work\`, flag it instead.
 
+- **A summary is as private as its source.** A note, index or memory entry that summarizes a
+  sensitive file is as sensitive as the file itself. Keep it in `private\` too, never in a handoff,
+  `MEMORY.md` or search index inside `work\`.
+
 - **Archive, don't delete.** Move unwanted files to `work\_archive\YYYY-MM-DD\`
   rather than deleting them. Genuine deletion requires explicit approval from the
   user in that moment.

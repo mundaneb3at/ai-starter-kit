@@ -188,6 +188,9 @@ you don't feel the next problem yet.
 - **Minimal:** five or fewer one-line rules the AI shows at the top of its first reply (`AGENTS.md`
   → Right-now rules, in this kit). Harness version: keep the list in one marked block of one file,
   and add a hook that runs on every message you send and re-shows the list on every fifth one.
+  Optional starters, if you want them: `tools\claude-code\hooks\rules-reshow.ps1` (this re-show
+  hook) and `ps51-command-gate.ps1` (holds back a reply whose PowerShell won't run on 5.1);
+  register them from `tools\claude-code\settings.hooks-example.json`.
 - **Failure it stops:** a rule that is written down but not in front of anyone when the decision
   is made.
 - **Watch for:** the list growing. Past about six lines nobody reads it; reword a rule instead of

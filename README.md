@@ -24,14 +24,16 @@ electrical engineer trying AI coding for the first time.
 | `CLAUDE.md` | your `work\` folder (root) | One line (`@AGENTS.md`) so Claude Code picks up the same rules. |
 | `WORKFLOWS.md` | your `work\` folder (root) | How the AI should approach multi-step work. Readable by you too. |
 | `WHY.md` | read it, don't install it | Why the kit is shaped this way, what it is NOT, the field-review history, and an FAQ. |
+| `CHANGELOG.md` | read it, don't install it | What changed in each release. `setup.ps1` reads the newest version id from it and records it in `work\KIT-VERSION.txt`. |
 | `HARNESS.md` | read it when one session isn't enough | The 17 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
 | `skills\` | your `work\` folder (root) | Reusable prompt-file skills the AI reads when a task matches one. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
 | `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands and web fetches) plus `/today` and `/close` commands. |
-| `templates\` | your `work\` folder (`setup.ps1` places them) | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. Work with any tool. |
+| `templates\` | `work\templates\` (`setup.ps1` places them); `TASKS.md`, `TODAY.md`, `MEMORY.md` also go to `work\` without their example entries | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. The copies in `work\templates\` keep their examples, to read and copy from; the ones your AI reads every session start blank. Work with any tool. |
 | `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for running cards unattended: each card gets its own terminal session, the card declares when it is done, a watcher checks its Done-when file and closes the session. Start with its README and `selftest.ps1`. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
+| `tools\claude-code\hooks\` | optional, Claude Code only; see `settings.hooks-example.json` next to it | Two opt-in hooks: one sends a reply back once if its PowerShell won't run on 5.1, one re-shows the Right-now rules every fifth message (`HARNESS.md` §17). |
 | `setup.ps1` | run once from PowerShell | Builds the folder layout, installs your chosen tool(s), and drops the config files in place. Safe + idempotent. |
 | `.gitignore` | your `work\` folder (root) | Keeps archives and secrets out of version control if you use git. |
 
@@ -91,8 +93,9 @@ powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool both
 folders and files only and install nothing.) This installs Node.js/Git if missing, installs
 your chosen AI tool(s) and checks each one actually starts, builds `work\`, `work\projects\`,
 `work\_archive\`, `work\handoffs\` and the sibling `private\`, copies the rule files, skills and
-tracking files into `work\`, and drops the tool config(s) into place — only where nothing
-already exists.
+tracking files into `work\` (the tracking files start without example entries; the examples sit
+in `work\templates\`), writes `work\KIT-VERSION.txt` (which kit release you installed and when),
+and drops the tool config(s) into place — only where nothing already exists.
 
 ### 2. Launch and verify
 ```powershell
@@ -105,7 +108,8 @@ its default script policy. `setup.ps1` normally fixes this for your account; if 
 CurrentUser Undefined`). Microsoft's explanation: `about_Execution_Policies`.
 
 Then say: *"read skills/setup-tutor/SKILL.md and walk me through it."* It'll check the folders,
-prove it's actually reading `AGENTS.md`, run the boundary checks, and hand off to `WORKFLOWS.md`.
+prove `AGENTS.md` is actually loaded at launch (a fresh session must open with the Right-now
+rules on its own), run the boundary checks, and hand off to `WORKFLOWS.md`.
 
 ### If a project inside `work\` has its own `.git`
 Tools differ on whether they still see the rules file above it:
@@ -120,7 +124,9 @@ Tools differ on whether they still see the rules file above it:
 ### macOS / Linux
 No script ships for these yet (this kit is Windows-tested only). By hand: install Node.js + your
 AI tool via your package manager, create `work\projects\ work\_archive\` and a sibling
-`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md .gitignore skills\` and the `templates\` files into `work\`, and place the
+`private\`, copy `AGENTS.md CLAUDE.md WORKFLOWS.md SEATS.md .gitignore skills\` into `work\` and
+the `templates\` folder to `work\templates\`, copy `TASKS.md`, `TODAY.md` and `MEMORY.md` from it
+into `work\` and delete their example lines, create an empty `work\memory\`, and place the
 tool config per its own docs. Untested — if you hit something, please open an issue.
 
 ### Known Windows issue: slowdown after days without a restart
@@ -200,10 +206,19 @@ When something you built is worth sharing:
 Newer versions live at
 [`github.com/mundaneb3at/ai-starter-kit`](https://github.com/mundaneb3at/ai-starter-kit).
 `setup.ps1` never overwrites, so re-running it won't bring changes in. To take an update:
-download or `git pull` the kit into its own folder (never into `work\`), read what changed
-(`git log --stat`), and copy the changed files into `work\` by hand. For `AGENTS.md`, merge the
-new lines into your edited copy; don't replace it. Then re-run the boundary checks in
-`skills\setup-tutor\SKILL.md` Step 4.
+
+1. Open `work\KIT-VERSION.txt`. Its `kit-version:` line is the release your install came from
+   No file, or `unknown`, means your install is older than the version marker (or setup was re-run
+   over an existing install): read the whole `CHANGELOG.md` and compare by file dates.
+2. Download or `git pull` the kit into its own folder (never into `work\`) and read its
+   `CHANGELOG.md`: every entry newer than your version is something to consider taking.
+3. Copy the changed files into `work\` by hand. For `AGENTS.md`, merge the new lines into your
+   edited copy; don't replace it. (`git log --stat` shows the file-level detail if the changelog
+   isn't enough.)
+4. Edit `kit-version:` in `work\KIT-VERSION.txt` to the newest entry you took.
+5. Re-run the boundary checks in `skills\setup-tutor\SKILL.md` Step 4. Do this after **every**
+   update of the AI tool itself too, not only after a kit update: the tools update themselves, and
+   a config the new version no longer reads gives no error, only a missing fence.
 
 ---
 

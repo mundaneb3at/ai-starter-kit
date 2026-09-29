@@ -46,6 +46,11 @@ Four rules hold it together:
 4. **Kill only what is provably empty, by exact name.** The reaper checks every pane's child
    processes and the attach count. It never runs `kill-server` and never stops `tmux.exe`.
 
+A script that launches many lanes at once is not an exception. Each lane still ends with its own
+`declare-done.ps1`, and the watcher and closer still cover every lane the script started. A batch
+runner that reaps lanes itself when it sees an output file skips the done check, the Done-when
+check and the close chain for all of them.
+
 ### Choices made for this port (and the alternative)
 - **Identity (F1).** The launcher passes the lane's identity in environment variables that Claude's
   shell tools inherit. Fallback: `display-message -p -t $env:TMUX_PANE '#S:#I'`. The owner's version walks

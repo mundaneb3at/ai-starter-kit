@@ -15,7 +15,9 @@
 #   <Base>\work\projects\
 #   <Base>\work\_archive\    <- archive-don't-delete target
 #   <Base>\work\handoffs\    <- one file per session, written at /close
-#   <Base>\work\TASKS.md, TODAY.md, MEMORY.md, memory\, templates\   <- the tracking files
+#   <Base>\work\TASKS.md, TODAY.md, MEMORY.md, memory\   <- your tracking files (start empty)
+#   <Base>\work\templates\   <- starting copies WITH example content, to read and copy from
+#   <Base>\work\KIT-VERSION.txt   <- which kit release you installed (from CHANGELOG.md)
 #   <Base>\private\          <- OUTSIDE work\. Never launch your AI tool here.
 #
 
@@ -183,18 +185,75 @@ function Copy-IfAbsent([string]$src, [string]$dst) {
     }
 }
 
+# An existing install (rules file already there before this run) gets kit-version "unknown" below:
+# re-running setup merges nothing, so it must not claim the newest release.
+$existingInstall = Test-Path (Join-Path $work "AGENTS.md")
 foreach ($name in "AGENTS.md", "CLAUDE.md", "WORKFLOWS.md", "SEATS.md", ".gitignore") {
     Copy-IfAbsent (Join-Path $PSScriptRoot $name) (Join-Path $work $name)
 }
 
-# The keeping-track files (AGENTS.md § Keeping track). Tool-agnostic, so placed for every -Tool.
+# The keeping-track files (AGENTS.md, section Keeping track). Tool-agnostic, so placed for every -Tool.
+# AGENTS.md has the AI read work\TASKS.md, TODAY.md and MEMORY.md every session, so they must not
+# carry made-up example entries. Copy-Blank places them without the examples; the full examples
+# go to work\templates\ instead, to read and copy from.
 $tpl = Join-Path $PSScriptRoot "templates"
-foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md") {
-    Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work $name)
+
+# Like Copy-IfAbsent, but drops the example lines: task checkboxes, dated table rows, and index
+# lines that link into memory\, and empties the numbered first item. Everything else (headings,
+# notes, comments) is kept.
+# Limit: pattern-based. A new example shape in a template just gets copied through; widen the patterns then.
+function Copy-Blank([string]$src, [string]$dst) {
+    if (Test-Path $dst) {
+        Write-Host ("  exists   " + $dst + "  (left untouched)") -ForegroundColor DarkGray
+    } elseif (Test-Path $src) {
+        $lines = [System.IO.File]::ReadAllText($src) -split "(?<=`n)"
+        $keep = @($lines | Where-Object {
+            $_ -notmatch '^- \[[ x]\] ' -and $_ -notmatch '^\| \d{4}-\d\d-\d\d ' -and $_ -notmatch '^- \[.*\]\(memory/'
+        } | ForEach-Object {
+            # the example first item keeps its number, so the list still reads 1. 2. 3.
+            if ($_ -match '^1\. \*\*') { "1.`n" } else { $_ }
+        })
+        New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
+        [System.IO.File]::WriteAllText($dst, (-join $keep), (New-Object System.Text.UTF8Encoding($false)))
+        Write-Host ("  placed   " + $dst + "  (example lines left out)") -ForegroundColor Green
+    } else {
+        Write-Host ("  NOTE: " + $src + " not found next to this script; copy it into work\ manually.") -ForegroundColor Yellow
+    }
 }
-Copy-IfAbsent (Join-Path $tpl "memory") (Join-Path $work "memory")
-foreach ($name in "handoff.md", "card.md", "fundamentals.jsonl") {
+
+foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md") {
+    Copy-Blank (Join-Path $tpl $name) (Join-Path $work $name)
+}
+$memDst = Join-Path $work "memory"
+if (-not (Test-Path $memDst)) {
+    New-Item -ItemType Directory -Path $memDst | Out-Null
+    Write-Host ("  created  " + $memDst) -ForegroundColor Green
+}
+# work\templates\ holds the full examples (and the other starting shapes). Never overwritten.
+foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md", "handoff.md", "card.md", "fundamentals.jsonl") {
     Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work "templates\$name")
+}
+Copy-IfAbsent (Join-Path $tpl "memory") (Join-Path $work "templates\memory")
+
+# Version marker: which kit release this install came from, so a later update has a base to
+# diff against. Read from the first "## [vX]" line of CHANGELOG.md next to this script.
+$kitVersion = 'unknown'
+$changelog = Join-Path $PSScriptRoot "CHANGELOG.md"
+if (Test-Path $changelog) {
+    $m = Select-String -Path $changelog -Pattern '^## \[(v[0-9.]+)\]' | Select-Object -First 1
+    if ($m) { $kitVersion = $m.Matches[0].Groups[1].Value }
+}
+if ($existingInstall) { $kitVersion = 'unknown' }
+$verFile = Join-Path $work "KIT-VERSION.txt"
+if (Test-Path $verFile) {
+    Write-Host ("  exists   " + $verFile + "  (left untouched)") -ForegroundColor DarkGray
+} else {
+    Set-Content -Path $verFile -Encoding ASCII -Value @(
+        "kit-version: $kitVersion",
+        "installed: $(Get-Date -Format 'yyyy-MM-dd')",
+        "note: after you merge a kit update into work\, edit kit-version by hand (README, Updating)."
+    )
+    Write-Host ("  placed   " + $verFile + "  (kit-version: $kitVersion)") -ForegroundColor Green
 }
 
 $skillsSrc = Join-Path $PSScriptRoot "skills"
@@ -213,7 +272,7 @@ if (-not (Test-Path $skillsSrc)) {
     }
 }
 
-# --- Step 4: tool configs (only if absent — never overwrite yours) ---------
+# --- Step 4: tool configs (only if absent -- never overwrite yours) ---------
 if ($Tool -eq 'codex' -or $Tool -eq 'both') {
     $codexDst = Join-Path $env:USERPROFILE ".codex\config.toml"
     if (Test-Path $codexDst) {
@@ -260,5 +319,7 @@ Write-Host "  2. Ask it to create a test file in work\ -> should succeed."
 Write-Host "  3. Ask it to read ..\private\does-not-exist.txt, then work\does-not-exist.txt."
 Write-Host "     Identical errors = reads aren't fenced. A distinct 'denied by permission settings'"
 Write-Host "     error on the private path = they are, for this tool. Both are real outcomes -- see README.md."
+Write-Host "  Run these three checks again after every update of the AI tool itself: a config the new"
+Write-Host "  version doesn't read gives no error, just no fence."
 Write-Host ""
 Write-Host "Or just say: 'read skills/setup-tutor/SKILL.md and walk me through it' and let the AI run the checks with you." -ForegroundColor Cyan

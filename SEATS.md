@@ -63,6 +63,11 @@ That was a single run of a single test: one example, not a measurement, so check
 your tool ships new models. How to route a card:
 `skills\write-a-card\SKILL.md` Step 0.
 
+Two habits for the cheap end. A cheap model sent to explore or list things gives you a reading
+list, not a tally: open a couple of the items yourself and re-check any count or "all covered"
+before you act on it. And don't run the lowest effort setting on a card that edits files; that is
+where a change gets reported as done without a real check.
+
 ## Adding a lane
 
 Once you're running two or more tools and want a permanent second seat:

@@ -29,11 +29,27 @@ Ask them to run `Get-Location` inside their AI tool's terminal / integrated shel
 path ends in `work\`. If not, have them `cd` there and relaunch the tool — the sandbox root is
 set by where the tool starts.
 
-### Step 3 — the canary (proves the rules file is actually read)
-Ask the AI tool itself: *"what's the first line of AGENTS.md?"* It should quote the real title
-line back verbatim. If it can't, the rules file isn't being read — check `CLAUDE.md`
-(should be exactly `@AGENTS.md`) or that `AGENTS.md` sits in the folder the tool was launched
-from.
+### Step 3 — the rules-file check (proves the rules file is loaded, not just readable)
+Asking a tool to quote `AGENTS.md` proves nothing: any tool that can open files will do it on
+request, loaded or not. So test the loading instead. Ask the user to **close the session and
+start a fresh one from `work\`**, then send a plain greeting ("hi") and nothing else: do not
+mention `AGENTS.md`, the rules, or this check. `AGENTS.md` tells the AI to open its first reply
+with the five Right-now rules, word for word. The user compares the reply with the list in
+`AGENTS.md` themselves.
+
+- **The five rules show up unprompted** → the file was loaded at launch.
+- **Anything else** (a plain greeting, a paraphrase, four rules) → it was not loaded, or not
+  followed. Check `CLAUDE.md` (should be exactly `@AGENTS.md`), that `AGENTS.md` sits in the
+  folder the tool was launched from, and that the five rules are still in your copy. Then retry
+  in another fresh session.
+
+Either way, bring the walk-through back in the new session by saying: *"read
+`skills/setup-tutor/SKILL.md` and continue at Step 4"*.
+
+If you removed the Right-now rules from your copy, plant your own token instead: add one line to
+`AGENTS.md` such as *"Start your first reply in each session with the words `rules-loaded-<a
+phrase only you know>`."* and run the same fresh-session greeting. The token exists only in that
+file, so seeing it can only mean the file was loaded.
 
 ### Step 4 — the boundary checks
 Run all three and record what happens:
@@ -59,8 +75,11 @@ Run all three and record what happens:
    README. See the README's honest-wall section for why the fence still isn't something to lean
    on for anything that actually matters (a hand-edited config, a different tool, a bypass flag).
 4. **Write down the tool's version next to your results** (`claude --version`, `codex --version`,
-   `opencode --version`). Tools change how these rules behave between versions, so re-run this
-   step after a big update.
+   `opencode --version`). Tools change how these rules behave between versions, and a config
+   the new version no longer reads gives no error, only a missing fence. So **re-run this step
+   after every update of the tool, not just a big one**, and compare the version you wrote down
+   with today's `--version` before you trust the fence. Tools that update themselves change
+   version without telling you, so also re-run it if you haven't in a while.
 
 Then have the AI explain, in its own words, what that means for what should and shouldn't live
 in `private\`. (It should land near: keep passwords, medical and money files encrypted or in a

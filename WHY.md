@@ -124,8 +124,10 @@ Read `HARNESS.md`. It is the generic version of the author's larger setup: what 
 block is for, the smallest version of it, and the failure it was built to stop.
 
 **How do I know the AI actually read `AGENTS.md`?**
-`setup-tutor` Step 3 plants a canary in the rules file and asks the AI to repeat it. If it can't,
-it isn't reading the file, whatever it says.
+Start a fresh session and just say hi. `AGENTS.md` tells the AI to open its first reply with the
+five Right-now rules; if they don't appear unprompted, the file wasn't loaded, whatever the AI says.
+(`setup-tutor` Step 3 walks you through it.) Asking it to quote the file proves nothing: it can
+open the file on request without having loaded it.
 
 **Can I trust the claims in these files?**
 Treat them as claims. `skills\primary-source\SKILL.md` is the discipline for checking any claim

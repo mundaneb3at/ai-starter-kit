@@ -24,3 +24,5 @@ The goal is the *root cause*, not a patch that makes the symptom disappear.
 - "Shotgun debugging" — changing several things and hoping.
 - Declaring it fixed without re-running the thing that failed.
 - Fixing the symptom while leaving the cause in place.
+- Calling a retry a new attempt when it only changed a parameter (a longer wait, a bigger number,
+  another flag). That is the same hypothesis again. Say what you now think is different first.

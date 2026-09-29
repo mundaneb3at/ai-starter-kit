@@ -62,8 +62,8 @@ the provider's billing page. Set one before your first long session.**
 | `tools\opencode\opencode.json` | `work\opencode.json` | "Add `opencode.json` in your project root." It "first looks for a config file in the current directory." [docs/config](https://opencode.ai/docs/config/) |
 | `tools\opencode\commands\close.md`, `today.md` | `work\.opencode\commands\` | Per-project commands live in `.opencode/commands/`; "The markdown file name becomes the command name", so these become `/close` and `/today`. [docs/commands](https://opencode.ai/docs/commands/) |
 | `skills\` | `work\skills\` | Read by the AI when `AGENTS.md` points at one (works in any tool, no discovery needed). |
-| `templates\TASKS.md`, `TODAY.md`, `MEMORY.md` | `work\` (top level) | Your trackers. Edit the example lines out. |
-| `templates\memory\` | `work\memory\` | One fact per file. The example shows the shape. |
+| `templates\TASKS.md`, `TODAY.md`, `MEMORY.md` | `work\` (top level, without the example entries) and `work\templates\` (with them) | Your trackers start blank; copy an example from `work\templates\` when you want one. |
+| `templates\memory\` | `work\templates\memory\` (`work\memory\` starts empty) | One fact per file. The example shows the shape. |
 | `templates\handoff.md`, `card.md` | `work\templates\` | `/close` fills in the handoff shape; handoffs land in `work\handoffs\`. `card.md` is for handing one job to another session. |
 
 **Make `work\` a local git repo once:** `cd <your work folder>`, then `git init`. OpenCode's

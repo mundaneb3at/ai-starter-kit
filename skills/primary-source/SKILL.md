@@ -76,6 +76,19 @@ than a snippet. Apply this discipline to what you find:
 For each key source, capture: tier (🟢/🟡/🔴), what makes it that tier, the specific detail it
 adds, and the link.
 
+**When a page won't read, that is not evidence either way.** Four fetch traps:
+- A search engine's summary paragraph is a synthesis, not a source. It blends figures from many
+  pages, so linking one result next to a number from it invents an attribution. Open the page and
+  find the figure, or mark the claim "from a snippet, not traced to one page".
+- A documentation site built by JavaScript can fetch as an empty page (a title and menu text).
+  Try the same address with `.md` on the end, or read the raw file from the project's public
+  repository. Cite the address you actually read, not the page you couldn't.
+- A question about how an API behaves (limits, response size, error codes) is answered by calling
+  the public endpoint and printing the status and sizes, not by reading a third party's
+  description of it. Label the result "my test, <date>, one example".
+- A paper page that a publisher or index blocks can often be read through an open scholarly API,
+  which returns the abstract as data.
+
 **Load-bearing claims** (about to be baked into code, a config, or a hard-to-reverse decision):
 don't trust one pass. Take each such claim and run a **second, deliberately skeptical pass** —
 actively try to find the source that *contradicts* it. A claim only clears to "rely on this" if a
@@ -131,6 +144,8 @@ verify this live" beats a confident invented citation.
 - **Cite or strike** — never manufacture a primary source or grade against an invented "standard."
 - **Don't flatten disagreement** into false consensus — the conflict *is* the signal.
 - **Ground in fetched sources, not training memory** — practice what the skill preaches.
+- **A "fetched" or "verified" tag in an AI-written report is itself a claim.** Open a few of the
+  tagged links before relying on the rest: do they load, and do they say what the report says?
 - **Don't pad** — surface signal; concise over comprehensive.
 - **Don't turn into a tidy do-this list** — if the output has no tiering, no gaps, and no
   disagreement, it failed.

@@ -39,8 +39,11 @@ remembering. Chat scrolls away; a file persists and the next session can read it
 4. **Tell the user in three lines:** the handoff path, what changed in TASKS.md, and any
    memory saved. Ask nothing unless an open question blocks the next step.
 5. **If `work\` is a git repo**, end with one yes/no: *"Commit today's changes locally?"* On a
-   yes, `git add -A` then `git commit -m "close <slug>"`. Never push. This commit is what makes
-   an older TASKS.md or MEMORY.md recoverable next month.
+   yes, commit only the files this session changed, by path: `git add` any new ones, write the
+   message (for example `close <slug>`) to a file outside `work\` (such as `$env:TEMP\msg.txt`), then `git commit -F <message-file> -- <those
+   files>` (see `AGENTS.md`, Terminal usage), and check with `git show --name-only HEAD`. Never
+   `git add -A`: another seat may have staged files in the same repo (`WORKFLOWS.md`). Never
+   push. This commit is what makes an older TASKS.md or MEMORY.md recoverable next month.
 
 ## Rules
 
