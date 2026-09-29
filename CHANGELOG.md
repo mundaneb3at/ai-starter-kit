@@ -7,6 +7,15 @@ semantic versions: a later date is a newer kit.
 Your install records the release it came from in `work\KIT-VERSION.txt`. To update, read every
 entry above that version, then follow "Updating this kit" in `README.md`.
 
+## [v2026.09.29.3] - 2026-09-29
+
+### Changed
+- `README.md` rewritten to cover everything the kit now ships: a list of all 13 skills (with
+  `write-a-card` and `update-kit`), how releases and date tags work and where your install
+  records its version, what `update-kit.ps1` does with and without `-Apply`, the tmux lanes
+  add-on's psmux requirement, the `LICENSE`, and a new "Related projects" section linking
+  AI Courier, panel-kit, agent-ops-playbook and sim-maker-kit. No other file changed.
+
 ## [v2026.09.29.2] - 2026-09-29
 
 ### Fixed

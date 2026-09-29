@@ -1,7 +1,8 @@
 # ai-starter-kit
 
-A small, **AI-agnostic** starter kit for "vibe coding" with an AI assistant on a fresh Windows
-machine. It sets up three things:
+A small starter kit for "vibe coding" (building things by describing what you want to an AI
+assistant) on a fresh Windows machine. It is **AI-agnostic**: it works with several AI coding
+tools, not one. It sets up three things:
 
 1. **File organization** — a folder layout where your AI can work freely on your projects while
    being kept out of anything private (see the honest wall below — the real story, not the
@@ -9,7 +10,11 @@ machine. It sets up three things:
 2. **Terminal usage** — how your AI runs shell commands safely: what it can do without asking,
    what needs your confirmation, and how secrets stay out of its reach.
 3. **How to actually use it** — a short phase ladder from "run the script" to "share your own
-   work," plus a handful of prompt-file skills for planning, debugging, learning, and trust.
+   work," plus 13 prompt-file skills for planning, debugging, learning, checking claims, and
+   handing work to another session.
+
+It also keeps itself up to date: each release has a date tag, your install remembers which one
+it came from, and `update-kit.ps1` brings a newer release in without overwriting your own edits.
 
 Written for anyone new to this — the original version of this kit was built for a working
 electrical engineer trying AI coding for the first time.
@@ -24,19 +29,35 @@ electrical engineer trying AI coding for the first time.
 | `CLAUDE.md` | your `work\` folder (root) | One line (`@AGENTS.md`) so Claude Code picks up the same rules. |
 | `WORKFLOWS.md` | your `work\` folder (root) | How the AI should approach multi-step work. Readable by you too. |
 | `WHY.md` | read it, don't install it | Why the kit is shaped this way, what it is NOT, the field-review history, and an FAQ. |
-| `CHANGELOG.md` | read it, don't install it | What changed in each release. `setup.ps1` reads the newest version id from it and records it in `work\KIT-VERSION.txt`. |
+| `CHANGELOG.md` | read it, don't install it | What changed in each release, newest first. Each release is a date tag (`vYYYY.MM.DD`, `.1`/`.2` for a second one the same day). `setup.ps1` reads the newest one from here and records it in `work\KIT-VERSION.txt`. |
 | `HARNESS.md` | read it when one session isn't enough | The 17 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
-| `skills\` | your `work\` folder (root) | Reusable prompt-file skills the AI reads when a task matches one. |
+| `skills\` | your `work\` folder (root) | 13 reusable prompt-file skills the AI reads when a task matches one. List below; `skills\README.md` says when each one fires. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
 | `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands and web fetches) plus `/today` and `/close` commands. |
 | `templates\` | `work\templates\` (`setup.ps1` places them); `TASKS.md`, `TODAY.md`, `MEMORY.md` also go to `work\` without their example entries | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. The copies in `work\templates\` keep their examples, to read and copy from; the ones your AI reads every session start blank. Work with any tool. |
-| `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for running cards unattended: each card gets its own terminal session, the card declares when it is done, a watcher checks its Done-when file and closes the session. Start with its README and `selftest.ps1`. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
+| `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for leaving AI jobs running unattended with Claude Code. Each job is written as a card (one file); each card runs in its own terminal window, says when it is finished, and a watcher script checks that the promised files exist and then closes that window. Needs psmux (tmux for Windows); its README says how to install it. Start with that README and `scripts\selftest.ps1`; `ARCHITECTURE.md` explains the design. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
-| `tools\claude-code\hooks\` | optional, Claude Code only; see `settings.hooks-example.json` next to it | Two opt-in hooks: one sends a reply back once if its PowerShell won't run on 5.1, one re-shows the Right-now rules every fifth message (`HARNESS.md` §17). |
-| `update-kit.ps1` | run from a NEWER copy of the kit, next to `work\` | Plans an update of `work\` to that kit and, with `-Apply`, takes the files you never changed. The `update-kit` skill walks you through the rest. |
+| `tools\claude-code\hooks\` | optional, Claude Code only; see `settings.hooks-example.json` next to it | Two opt-in hooks: `ps51-command-gate.ps1` catches a reply whose PowerShell commands won't run on Windows' built-in PowerShell 5.1 and sends it back once to be fixed; `rules-reshow.ps1` re-shows the Right-now rules every fifth message (`HARNESS.md` §17). |
+| `update-kit.ps1` | run from a NEWER copy of the kit, next to `work\` | Plans an update of `work\` to that kit (on its own it changes nothing) and, with `-Apply`, takes the files you never changed. The `update-kit` skill walks you through the rest. See "Updating this kit". |
 | `setup.ps1` | run once from PowerShell | Builds the folder layout, installs your chosen tool(s), and drops the config files in place. Safe + idempotent. |
 | `.gitignore` | your `work\` folder (root) | Keeps archives and secrets out of version control if you use git. |
+| `LICENSE` | stays with the kit | MIT: use, change and share it freely. |
+
+### The skills
+
+A skill is a short procedure the AI reads when a task matches it; you don't have to call it by
+name. `skills\README.md` has the full table.
+
+- **Doing the work:** `scope-first` (plan before an unclear or risky task), `debug-systematically`
+  (something is broken), `verify-before-done` (check before calling it done),
+  `document-and-handoff` (wrap up a session), `safe-cleanup` (tidy files without losing any).
+- **Learning and deciding:** `tutor` (a whole study session on a topic), `quiz-me` (drill one
+  concept), `grill-me` (pressure-test a plan), `primary-source` (check a claim against real sources).
+- **Beyond one session:** `write-a-card` (write a job down so another session can run it),
+  `companion` (a second session that watches running work and answers your questions).
+- **The kit itself:** `setup-tutor` (check your install step by step), `update-kit` (take a newer
+  release without losing your changes).
 
 ---
 
@@ -68,16 +89,16 @@ matters.
 This isn't a guess: it's measured. Codex, on its default config, does not fence reads at all —
 asking it to read a nonexistent file inside `private\` versus inside `work\` comes back with the
 identical "not found" error either way. Claude Code is different **only because `setup.ps1`
-templates your real `private\` path into its permission config at install time** — with that in
+writes your real `private\` folder path into Claude Code's permission settings at install time** — with that in
 place, a read into `private\` is actually denied with a distinct "denied by your permission
 settings" error. That's a real, working boundary for Claude Code specifically, on this machine,
 with that config installed — it is not a property of sandboxed AI tools in general, it doesn't
 survive a hand-edited config or a different tool, and it says nothing about writes on other
 tools. `skills\setup-tutor\SKILL.md` walks you through running this probe yourself so you know
 what your actual setup does, instead of trusting this paragraph.
-Re-measured 2026-09-26 on Claude Code 2.1.283: with the templated rule in place, the file-read
-tool, a Bash `cat` and a PowerShell `Get-Content` of a canary in `private\` were all denied;
-with the rule removed, all three read it.
+Re-measured 2026-09-26 on Claude Code 2.1.283 with a test file placed in `private\`: with that
+rule in place, three different ways of reading it (the file-read tool, a Bash `cat` and a
+PowerShell `Get-Content`) were all denied; with the rule removed, all three read it.
 
 ---
 
@@ -131,8 +152,9 @@ into `work\` and delete their example lines, create an empty `work\memory\`, and
 tool config per its own docs. Untested — if you hit something, please open an issue.
 
 ### Known Windows issue: slowdown after days without a restart
-On Windows 11 build 26200 (25H2) there is a Windows bug that leaks a small kernel object when
-programs start other programs, and AI coding tools start a lot of short-lived commands. If
+On Windows 11 build 26200 (25H2) there is a Windows bug that slowly uses up a small internal
+resource each time one program starts another (technically, it leaks a kernel object), and AI
+coding tools start a lot of short-lived commands. If
 starting commands gets noticeably slower after a few days of uptime, **restart**: that clears
 it. An optional per-user registry workaround (`ForegroundLockTimeout` = 0) stops the leak, at
 the cost of letting any app take focus from the window you're typing in. The exact steps and the
@@ -179,6 +201,8 @@ claim against real sources before trusting it).
 `debug-systematically`, `verify-before-done`, `document-and-handoff`, `safe-cleanup`), and
 `SEATS.md` for when to give a second tool a seat. When one session or one tool stops being
 enough — overnight work, several sessions, a session that has run too long — read `HARNESS.md`.
+To hand a job to another session, say *"write a card"*: the `write-a-card` skill fills in
+`templates\card.md` so a fresh session can run the job without your chat history.
 Leaving a long job running and want to ask about it from elsewhere? `skills\companion\SKILL.md`
 sets up a second session that watches it and tells you when to act, and never touches it.
 
@@ -206,6 +230,10 @@ When something you built is worth sharing:
 
 Newer versions live at
 [`github.com/mundaneb3at/ai-starter-kit`](https://github.com/mundaneb3at/ai-starter-kit).
+Every release is a git tag named by date (`v2026.09.29`, then `v2026.09.29.1` for a second one
+that day), listed under Tags on that page and described in `CHANGELOG.md`. Your install writes the
+release it came from to `work\KIT-VERSION.txt`, so you can always tell how far behind you are.
+
 `setup.ps1` never overwrites, so re-running it won't bring changes in. To take an update without
 losing your own changes:
 
@@ -227,6 +255,23 @@ losing your own changes:
 5. Re-run the boundary checks in `skills\setup-tutor\SKILL.md` Step 4. Do this after **every**
    update of the AI tool itself too, not only after a kit update: the tools update themselves, and
    a config the new version no longer reads gives no error, only a missing fence.
+
+---
+
+## Related projects
+
+Separate repos from the same GitHub account. None of them is needed to use the kit.
+
+- [**AI Courier**](https://github.com/mundaneb3at/ai-courier) — lets two people's AI assistants
+  exchange notes without prompt injection: a quarantined reader with no tools, a validator,
+  human-signed sends and a canary that tests itself. Windows / PowerShell.
+- [**panel-kit**](https://github.com/mundaneb3at/panel-kit) — a terminal status board for
+  Windows + PowerShell, driven by one manifest file, no dependencies.
+- [**agent-ops-playbook**](https://github.com/mundaneb3at/agent-ops-playbook) — a written
+  doctrine for running many AI agents with budgets, verification gates, contract templates and a
+  failure ledger.
+- [**sim-maker-kit**](https://github.com/mundaneb3at/sim-maker-kit) — build offline study
+  simulations with Learn, Explore and Practice modes (the example project in the phase ladder).
 
 ---
 
