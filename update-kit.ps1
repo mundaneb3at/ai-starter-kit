@@ -91,7 +91,7 @@ $plan = foreach ($m in $map) {
     $n = Get-Norm (Join-Path $New $m[0]); $y = Get-Norm (Join-Path $Work $m[1])
     $b = if ($Base) { Get-Norm (Join-Path $Base $m[0]) } else { $null }
     $s = if ($y -eq $n) { 'CURRENT' }
-         elseif (-not $y) { if ($b) { 'DELETED' } else { 'ADD' } }     # base had it and you don't: you removed it
+         elseif (-not $y) { if ($b -and $m[0] -notlike 'templates\*') { 'DELETED' } else { 'ADD' } }   # you removed it (templates\ are reference copies whose place changed between releases: always ADD)
          elseif (-not $b) { 'REVIEW' }                                    # no base copy of this file to compare with
          elseif ($y -eq $b) { 'TAKE-NEW' } elseif ($n -eq $b) { 'KEEP' } else { 'MERGE' }
     [pscustomobject]@{ Status = $s; Path = $m[1]; Kit = $m[0] }

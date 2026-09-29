@@ -7,6 +7,13 @@ semantic versions: a later date is a newer kit.
 Your install records the release it came from in `work\KIT-VERSION.txt`. To update, read every
 entry above that version, then follow "Updating this kit" in `README.md`.
 
+## [v2026.09.29.2] - 2026-09-29
+
+### Fixed
+- `update-kit.ps1`: on an install from before `v2026.09.29`, the example files in `templates\` were
+  reported as DELETED (as if you had removed them) because older setups put them in a different
+  place. A missing `templates\` file is now always ADD.
+
 ## [v2026.09.29.1] - 2026-09-29
 
 ### Added
