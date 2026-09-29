@@ -20,6 +20,7 @@ piece of work, with no two overlapping:
 | `grill-me` | Decide | a plan or design needs pressure-testing before you build it |
 | `primary-source` | Trust | a claim or piece of advice needs checking against real sources |
 | `companion` | Watch | work is already running and the user wants a second session to watch it and answer questions |
+| `update-kit` | Maintain | a newer kit release is out: update `work\` without losing the user's own changes |
 | `write-a-card` | Hand off | a job should run in another session: decide it's ready, ground it, settle decisions, write `templates\card.md`, check it |
 
 ## How to use them

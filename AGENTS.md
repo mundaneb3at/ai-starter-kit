@@ -143,6 +143,7 @@ Full list + non-redundancy table: `skills\README.md`.
 | finishing or pausing a chunk of work | `document-and-handoff` |
 | tidying or restructuring files | `safe-cleanup` |
 | writing a job for another session to run ("write a card") | `write-a-card` |
+| taking a newer kit release without losing your own changes ("update the kit") | `update-kit` |
 | the user says "close" / "wrap up" / runs `/close` | `document-and-handoff` (handoff + TASKS + memory) |
 | the user says "what's today" / runs `/today` | read the four files in "Keeping track" below, propose at most 3 |
 

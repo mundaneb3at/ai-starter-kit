@@ -251,7 +251,7 @@ if (Test-Path $verFile) {
     Set-Content -Path $verFile -Encoding ASCII -Value @(
         "kit-version: $kitVersion",
         "installed: $(Get-Date -Format 'yyyy-MM-dd')",
-        "note: after you merge a kit update into work\, edit kit-version by hand (README, Updating)."
+        "note: the update-kit skill changes this line after an update (README, Updating this kit)."
     )
     Write-Host ("  placed   " + $verFile + "  (kit-version: $kitVersion)") -ForegroundColor Green
 }

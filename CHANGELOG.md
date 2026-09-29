@@ -1,11 +1,24 @@
 # Changelog
 
 What changed in each release of this kit, newest first. Format follows
-[Keep a Changelog](https://keepachangelog.com/). Version ids are date tags (`vYYYY.MM.DD`), not
+[Keep a Changelog](https://keepachangelog.com/). Version ids are date tags (`vYYYY.MM.DD`, with `.1`, `.2` for a second release the same day), not
 semantic versions: a later date is a newer kit.
 
 Your install records the release it came from in `work\KIT-VERSION.txt`. To update, read every
 entry above that version, then follow "Updating this kit" in `README.md`.
+
+## [v2026.09.29.1] - 2026-09-29
+
+### Added
+- `update-kit.ps1` and `skills\update-kit`: take a new kit release without losing your own
+  changes. The script compares three copies of every kit file (the release you installed, yours,
+  the new one): files you never changed are updated, files only you changed are kept, files you
+  both changed are merged by your AI around your edits with your approval. Everything it replaces
+  is archived first with a manifest, so an update can be undone. A file you deleted stays deleted;
+  a kit older than yours is refused. `README.md` "Updating this kit", `AGENTS.md` and the skills
+  table now point to it, and `KIT-VERSION.txt` notes that the skill updates it.
+- Git tags for the two earlier releases (`v2026.09.26`, `v2026.09.27`), so an install from before the
+  version file can name its base with `update-kit.ps1 -BaseTag`.
 
 ## [v2026.09.29] - 2026-09-29
 
@@ -71,7 +84,7 @@ State of the kit before this changelog existed, summarised from its commit messa
 - Added the advanced tmux lanes add-on (`advanced\tmux-lanes\`).
 
 ### Earlier releases (no date tag)
-- 2026-09-26: v4. Verified installs, OpenCode and no-tool setup, tracking templates, `tutor` and
+- 2026-09-26 (tag `v2026.09.26`): v4. Verified installs, OpenCode and no-tool setup, tracking templates, `tutor` and
   `companion` skills.
 - 2026-09-21: `WHY.md` and `HARNESS.md` added.
 - 2026-09-14: fixes from the field review synced in.

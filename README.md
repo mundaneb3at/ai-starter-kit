@@ -34,6 +34,7 @@ electrical engineer trying AI coding for the first time.
 | `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for running cards unattended: each card gets its own terminal session, the card declares when it is done, a watcher checks its Done-when file and closes the session. Start with its README and `selftest.ps1`. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
 | `tools\claude-code\hooks\` | optional, Claude Code only; see `settings.hooks-example.json` next to it | Two opt-in hooks: one sends a reply back once if its PowerShell won't run on 5.1, one re-shows the Right-now rules every fifth message (`HARNESS.md` §17). |
+| `update-kit.ps1` | run from a NEWER copy of the kit, next to `work\` | Plans an update of `work\` to that kit and, with `-Apply`, takes the files you never changed. The `update-kit` skill walks you through the rest. |
 | `setup.ps1` | run once from PowerShell | Builds the folder layout, installs your chosen tool(s), and drops the config files in place. Safe + idempotent. |
 | `.gitignore` | your `work\` folder (root) | Keeps archives and secrets out of version control if you use git. |
 
@@ -205,17 +206,24 @@ When something you built is worth sharing:
 
 Newer versions live at
 [`github.com/mundaneb3at/ai-starter-kit`](https://github.com/mundaneb3at/ai-starter-kit).
-`setup.ps1` never overwrites, so re-running it won't bring changes in. To take an update:
+`setup.ps1` never overwrites, so re-running it won't bring changes in. To take an update without
+losing your own changes:
 
-1. Open `work\KIT-VERSION.txt`. Its `kit-version:` line is the release your install came from
-   No file, or `unknown`, means your install is older than the version marker (or setup was re-run
-   over an existing install): read the whole `CHANGELOG.md` and compare by file dates.
-2. Download or `git pull` the kit into its own folder (never into `work\`) and read its
-   `CHANGELOG.md`: every entry newer than your version is something to consider taking.
-3. Copy the changed files into `work\` by hand. For `AGENTS.md`, merge the new lines into your
-   edited copy; don't replace it. (`git log --stat` shows the file-level detail if the changelog
-   isn't enough.)
-4. Edit `kit-version:` in `work\KIT-VERSION.txt` to the newest entry you took.
+1. Download the new kit into its own folder next to `work\` (never inside it) and read its
+   `CHANGELOG.md`: every entry newer than the `kit-version:` in your `work\KIT-VERSION.txt` is
+   something you may take. No file, or `unknown`, means an older install.
+2. Tell your AI: *"read skills/update-kit/SKILL.md and update my kit"* (the skill is in the new
+   kit's `skills\` folder if your `work\` doesn't have it yet). It runs `update-kit.ps1` from the
+   new folder, which compares three copies of every kit file: the release you installed, yours,
+   and the new one. You see the list first and can leave any file out. Files you never changed
+   are updated; files only you changed are kept; files you deleted stay deleted; files you both
+   changed are merged around your edits, with you approving each one. Every file it
+   replaces is copied to `work\_archive\<date>-kit-update\` first, so you can undo.
+   Older install without a version file? If you know which release you installed, add
+   `-BaseTag <tag>` (tags are on the GitHub page); otherwise it shows you each difference and asks.
+3. Your tracking files, `memory\`, `handoffs\` and tool configs outside `work\` are never touched.
+   Compare the tool configs by hand if the changelog mentions them.
+4. The skill sets `kit-version:` to the new release once everything is merged.
 5. Re-run the boundary checks in `skills\setup-tutor\SKILL.md` Step 4. Do this after **every**
    update of the AI tool itself too, not only after a kit update: the tools update themselves, and
    a config the new version no longer reads gives no error, only a missing fence.
