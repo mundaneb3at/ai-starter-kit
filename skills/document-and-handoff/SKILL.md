@@ -10,7 +10,9 @@ remembering. Chat scrolls away; a file persists and the next session can read it
 
 ## Steps
 
-1. **Write the handoff.** Create `handoffs\YYYY-MM-DD-<slug>.md` (read today's date from the
+1. **Write the handoff.** If the work kept a `PROGRESS.md` (`templates\progress.md`), read it
+   first: its Done lines are the checked record, and its Next line is the handoff's Next. Create
+   `handoffs\YYYY-MM-DD-<slug>.md` (read today's date from the
    clock, don't guess; `<slug>` = 2-4 lowercase words for the topic, hyphenated). Use
    `templates\handoff.md` if it exists, otherwise these headings:
    - **Goal** — one line.

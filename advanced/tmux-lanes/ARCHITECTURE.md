@@ -52,6 +52,18 @@ runner that reaps lanes itself when it sees an output file skips the done check,
 check and the close chain for all of them.
 
 ### Choices made for this port (and the alternative)
+- **One watcher per state folder, refused not merged.** `lane-watch.ps1` writes `<state>\watcher.lock`
+  (`<pid> <process start ticks>`; the start time keeps a recycled pid from looking alive) and a second
+  watcher exits 2. A watcher acts on every declaration in its folder, so two of them would both send
+  `/exit` to the same lane. The owner's setup found the same thing the hard way: a watcher started "for
+  one session" closed and reaped another session's finished lane, and its idle timer stayed open as long
+  as any lane existed anywhere. Treat every watcher as a pool watcher. Separate pools need separate
+  `-StateDir`s. A check-then-write lock is not a mutex; two starts in the same instant can both win.
+- **No elevated shells.** `lane-launch.ps1` and `lane-watch.ps1` refuse to run from an admin PowerShell
+  (`-AllowElevated` overrides). A psmux server started elevated cannot be reached from normal shells: the
+  lane runs, but `tmux ls`, the watcher and the reaper cannot see it, so it sits finished. The check is
+  on the elevation itself, because a `tmux ls` run afterwards from that same elevated shell succeeds and
+  would pass exactly the failing case.
 - **Identity (F1).** The launcher passes the lane's identity in environment variables that Claude's
   shell tools inherit. Fallback: `display-message -p -t $env:TMUX_PANE '#S:#I'`. The owner's version walks
   from the tool process up to `claude.exe` and reads the harness's own session registry
@@ -64,7 +76,8 @@ check and the close chain for all of them.
   a list, waiting for idle before each one. The owner runs `/model sonnet` -> `/workflow-capture` ->
   `/close full` so the wrap-up is done on a cheaper model, then `/exit`. That chain needs its
   own checks (a model-switch confirmation box, a close that pauses for an answer), which is why it
-  isn't the default here.
+  isn't the default here. Such a chain shows up in the transcript: a lane that worked on Haiku has
+  Sonnet records after its "done". Read the model by timestamp (see Transcript verification).
 - **Launch args in a JSON file, window command base64-encoded.** The first message, the flags and the
   folders travel in the JSON file. Two early owner launches died silently when a prompt with
   apostrophes and parentheses went through the tmux -> psmux -> PowerShell command-line layers. Even
@@ -122,8 +135,23 @@ scripts. The launcher refuses, the watcher decides.
   before big runs, handles hitting the usage wall mid-lane, and throttles when the window runs short.
   Skipped here on purpose. If you need it, the signal to watch for is a 429 / usage-limit record in
   the lane's transcript. Treat it as "paused", never as "finished".
+- **Idle exit + auto-start: mark the heartbeat stale on exit.** If you let the watcher exit when there is
+  nothing left to watch, and start it automatically (a session-start hook, or the launcher) only when its
+  heartbeat or status file is older than N minutes, watch the order of events. The watcher rewrites that
+  file on every tick, so after a clean idle exit it still looks fresh for N minutes and the gate skips the
+  start. In the owner's setup a lane launched 17 seconds after such an exit declared done and sat
+  unreaped, with no watcher, until the gate opened. Fix it at the writer: on an idle exit, rewrite the file
+  as `exited` and back-date its modified time past N (`(Get-Item $f).LastWriteTime = (Get-Date).AddHours(-1)`).
+  Guarding the START (do not stamp after a refused or dead start) does not close this gap, because the
+  bad stamp here comes from a successful run. A crashed or killed watcher still leaves a fresh file, so
+  keep a manual start line as the fallback, or have the gate also check the pid. Test it by launching a
+  lane right after the exit, not by reading the file. This kit's watcher has no idle exit and no
+  auto-start, so the situation does not arise unless you add both.
 - **Transcript verification.** Claude writes `~\.claude\projects\<cwd-with-dashes>\<session-id>.jsonl`.
-  Each record carries `"model"` (the served model) and `"permissionMode"`, and each real tool call looks like
+  Each record carries `"model"` (the served model) and `"permissionMode"`. Read the model **by
+  timestamp, not as a count**: records after the lane's "done" are the close sequence and may run on a
+  different model than the work did (measured: 7 Haiku records for the task, then 13 Sonnet records from
+  the watcher's wrap-up). Each real tool call looks like
   `"type":"tool_use","id":"toolu_...","name":"<Tool>"`. Anchor on that shape, not on a bare
   `"name":"<Tool>"`: that also matches the tool schema record. That's how the self-test run of
   this kit was checked.

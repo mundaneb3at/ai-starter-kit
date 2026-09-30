@@ -4,6 +4,11 @@
 # Archived files (archive-don't-delete target)
 _archive/
 
+# Personal files the AI fills in about you - keep them off any repo you push
+# (anchored to this folder's root, so the blank copies in templates\ stay tracked)
+/ABOUT-ME.md
+/FRUSTRATIONS.md
+
 # Local secrets / credentials - never commit these
 .env
 *.secret

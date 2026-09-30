@@ -27,9 +27,9 @@ card.md --lane-launch--> tmux session "<lane>"          lane-watch (its own sess
 
 | File | Purpose |
 |---|---|
-| `scripts\lane-launch.ps1` | Start one card as one lane: its own session, window 0 a shell, window 1 Claude. Refuses a card without a Done-when path, a finished card, or a session name already in use. |
+| `scripts\lane-launch.ps1` | Start one card as one lane: its own session, window 0 a shell, window 1 Claude. Refuses a card without a Done-when path, a finished card, a session name already in use, or an elevated (admin) shell. |
 | `scripts\declare-done.ps1` | The lane's own "I'm finished" signal. The one and only done-signal; done is never guessed from idle time or a timer. |
-| `scripts\lane-watch.ps1` | The close watcher. Checks each declaration against the card's Done-when paths and sends `/exit` only when they all exist. |
+| `scripts\lane-watch.ps1` | The close watcher. Checks each declaration against the card's Done-when paths and sends `/exit` only when they all exist. One per state folder (lock file); refuses an elevated shell. |
 | `scripts\done-when.ps1` | Reads a card's Done-when block and checks the paths. Used by the launcher and the watcher. |
 | `scripts\reap-husk.ps1` | Kills a session left with nothing but idle shells. Never touches a session with anything running in it. |
 | `scripts\selftest.ps1` | Proves the whole loop on your machine in about a minute. |
@@ -87,6 +87,13 @@ MCP servers and the Chrome extension) so the test does not depend on your person
 need those flags. Add them through `-ClaudeArgs` if you want the same isolation.
 
 Stop the watcher: `New-Item "$env:TEMP\tmux-lanes\STOP"` (it removes the file and exits on its next tick).
+
+**One watcher at a time.** A watcher closes every lane that declares done in its state folder, not only
+the lanes you launched after starting it, so two watchers on one folder would both type `/exit` into the
+same lane. `lane-watch.ps1` keeps `<state>\watcher.lock` and refuses a second one. The watcher reads every
+declaration on every tick, so the order is forgiving: a lane launched before the watcher is still closed
+once a watcher starts. `lane-launch` does not check that one is running. To ask "is a watcher alive?",
+read the lock (`<pid> <start time>`); do not guess from a window name.
 Sweep leftover husks by hand: `.\reap-husk.ps1 -Prefix lane- -DryRun`, then again without `-DryRun`.
 
 **Permissions.** A lane runs with nobody watching, so a permission prompt stalls it forever. The
@@ -152,9 +159,23 @@ Each entry: **symptom** -> fix.
   a normal terminal that stays open, not from another Claude session.
 - **`has-session` says no such session, yet a new session with that name dies within seconds.** The
   name is shadowed: an unreachable psmux server (started elevated, or as another user) still owns it,
-  and psmux reaps the newcomer. -> Use a different `-Session` name. To see the owner:
+  and psmux reaps the newcomer. (The launcher now refuses an elevated shell, which was the usual cause.) -> Use a different `-Session` name. To see the owner:
   `Get-Content "$env:USERPROFILE\.psmux\<name>.pid"` and look that pid up in Task Manager. Stop that
   process tree from an elevated terminal if you want the name back.
+- **`refused: this is an elevated (admin) shell`.** A tmux server started from an admin PowerShell
+  cannot be reached from normal shells, so lanes it starts are invisible to the watcher and to
+  `tmux ls`, and sit finished forever. -> Open a normal PowerShell and run it there. `-AllowElevated`
+  overrides the check (then run the watcher elevated too).
+- **`refused: a watcher already holds ...watcher.lock`.** Another watcher is running on this state
+  folder. -> Use it, or stop it with the STOP file. A watcher that was killed leaves a stale lock; the
+  next start notices the process is gone and takes over. A lane whose own state folder differs (`-StateDir`)
+  is a separate pool with its own watcher.
+- **The lane's transcript shows more than one model.** Read the served model (`"model"` on each record in
+  `~\.claude\projects\...\<session>.jsonl`) **by timestamp**, not as a count. Records written after the
+  lane declared done belong to the close sequence: with `-CloseCommands '/model sonnet', ...` the wrap-up
+  runs on the model you switched to. A lane that did its work on Haiku and its close on Sonnet is working
+  as designed, not mis-served. To check the model the lane really worked on, look at the records before
+  the `declare-done` call.
 - **Every session vanished at once.** Someone stopped a `tmux.exe` process, probably one called
   `__warm__`. psmux keeps a pre-warmed server that can host live sessions. -> Never `Stop-Process`
   `tmux.exe` and never `tmux kill-server`. Close sessions by exact name (`kill-session -t <name>`).

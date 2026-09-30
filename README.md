@@ -10,8 +10,8 @@ tools, not one. It sets up three things:
 2. **Terminal usage** — how your AI runs shell commands safely: what it can do without asking,
    what needs your confirmation, and how secrets stay out of its reach.
 3. **How to actually use it** — a short phase ladder from "run the script" to "share your own
-   work," plus 13 prompt-file skills for planning, debugging, learning, checking claims, and
-   handing work to another session.
+   work," plus 21 prompt-file skills for planning, debugging, learning, checking claims,
+   everyday jobs (a letter, a small fix, a messy folder), and handing work to another session.
 
 It also keeps itself up to date: each release has a date tag, your install remembers which one
 it came from, and `update-kit.ps1` brings a newer release in without overwriting your own edits.
@@ -32,10 +32,10 @@ electrical engineer trying AI coding for the first time.
 | `CHANGELOG.md` | read it, don't install it | What changed in each release, newest first. Each release is a date tag (`vYYYY.MM.DD`, `.1`/`.2` for a second one the same day). `setup.ps1` reads the newest one from here and records it in `work\KIT-VERSION.txt`. |
 | `HARNESS.md` | read it when one session isn't enough | The 17 building blocks of a larger, unattended setup — problem, minimal version, failure it stops. |
 | `SEATS.md` | your `work\` folder (root) | Role-based assignment (Orchestrator / Builder) so any tool can fill either job. |
-| `skills\` | your `work\` folder (root) | 13 reusable prompt-file skills the AI reads when a task matches one. List below; `skills\README.md` says when each one fires. |
+| `skills\` | your `work\` folder (root) | 21 reusable prompt-file skills the AI reads when a task matches one. List below; `skills\README.md` says when each one fires. |
 | `tools\codex\config.toml` | `C:\Users\<you>\.codex\config.toml` | Codex's machine config — sandbox boundary, approval policy, secret filtering. |
-| `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands and web fetches) plus `/today` and `/close` commands. |
-| `templates\` | `work\templates\` (`setup.ps1` places them); `TASKS.md`, `TODAY.md`, `MEMORY.md` also go to `work\` without their example entries | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. The copies in `work\templates\` keep their examples, to read and copy from; the ones your AI reads every session start blank. Work with any tool. |
+| `tools\opencode\` | your `work\` folder (`setup.ps1 -Tool opencode` places it; see its README) | OpenCode config (keeps tools out of folders outside `work\`, asks before destructive commands, web searches and web fetches) plus `/today` and `/close` commands. |
+| `templates\` | `work\templates\` (`setup.ps1` places them); `TASKS.md`, `TODAY.md`, `MEMORY.md` also go to `work\` without their example entries; `ABOUT-ME.md` and `FRUSTRATIONS.md` go to `work\` blank (personal, gitignored) | Starting copies of `TASKS.md`, `TODAY.md`, `MEMORY.md` + `memory\`, the handoff shape, a one-job card, a per-task `progress.md` log, the two personal files, and an example fundamentals register (`HARNESS.md` §16) — the "Keeping track" files `AGENTS.md` describes. The copies in `work\templates\` keep their examples, to read and copy from; the ones your AI reads every session start blank. Work with any tool. |
 | `advanced\tmux-lanes\` | nowhere; read it in place, **for technical users** | An add-on for leaving AI jobs running unattended with Claude Code. Each job is written as a card (one file); each card runs in its own terminal window, says when it is finished, and a watcher script checks that the promised files exist and then closes that window. Needs psmux (tmux for Windows); its README says how to install it. Start with that README and `scripts\selftest.ps1`; `ARCHITECTURE.md` explains the design. Skip it until `HARNESS.md` blocks 4-7 are a problem you actually have. |
 | `tools\claude-code\settings.json` | `C:\Users\<you>\.claude\settings.json` | Claude Code's permission denylist — the `private\` boundary + delete-command guards. JSON has no comments, so: `setup.ps1` rewrites the `private\` path in this file to your actual absolute path when it installs it (a relative pattern was tested live and does not reliably block access — see the honest wall below). If you ever copy this file manually instead of running the script, edit that path yourself first. |
 | `tools\claude-code\hooks\` | optional, Claude Code only; see `settings.hooks-example.json` next to it | Two opt-in hooks: `ps51-command-gate.ps1` catches a reply whose PowerShell commands won't run on Windows' built-in PowerShell 5.1 and sends it back once to be fixed; `rules-reshow.ps1` re-shows the Right-now rules every fifth message (`HARNESS.md` §17). |
@@ -52,6 +52,12 @@ name. `skills\README.md` has the full table.
 - **Doing the work:** `scope-first` (plan before an unclear or risky task), `debug-systematically`
   (something is broken), `verify-before-done` (check before calling it done),
   `document-and-handoff` (wrap up a session), `safe-cleanup` (tidy files without losing any).
+- **Everyday:** `start` (the one smallest first move), `fix-a-small-problem` (one check per turn,
+  a help request after two failed tries), `write-a-document` (a letter, email or form, every fact
+  checked against the thread), `organize-my-files` (give a messy folder a shape), `parking-lot`
+  (save a stray thought and get back to work), `questionnaire` (read your files first, then ask
+  only what's missing), `find-advice` (look it up on the web, every point with its page),
+  `about-me` (your own profile, saved only after a yes).
 - **Learning and deciding:** `tutor` (a whole study session on a topic), `quiz-me` (drill one
   concept), `grill-me` (pressure-test a plan), `primary-source` (check a claim against real sources).
 - **Beyond one session:** `write-a-card` (write a job down so another session can run it),
@@ -198,7 +204,9 @@ it's new to you), `quiz-me` (drill one concept cold instead of being handed the 
 claim against real sources before trusting it).
 
 **4. Work like a team.** Read `WORKFLOWS.md` + the five workflow skills (`scope-first`,
-`debug-systematically`, `verify-before-done`, `document-and-handoff`, `safe-cleanup`), and
+`debug-systematically`, `verify-before-done`, `document-and-handoff`, `safe-cleanup`),
+`organize-my-files` (give a messy folder a shape a fresh session can navigate, one step per
+turn), `about-me` (tell the AI how you like to work, once), and
 `SEATS.md` for when to give a second tool a seat. When one session or one tool stops being
 enough — overnight work, several sessions, a session that has run too long — read `HARNESS.md`.
 To hand a job to another session, say *"write a card"*: the `write-a-card` skill fills in

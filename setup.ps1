@@ -224,13 +224,17 @@ function Copy-Blank([string]$src, [string]$dst) {
 foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md") {
     Copy-Blank (Join-Path $tpl $name) (Join-Path $work $name)
 }
+# The two personal files ship blank already (the AI fills them in only after a yes; gitignored).
+foreach ($name in "ABOUT-ME.md", "FRUSTRATIONS.md") {
+    Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work $name)
+}
 $memDst = Join-Path $work "memory"
 if (-not (Test-Path $memDst)) {
     New-Item -ItemType Directory -Path $memDst | Out-Null
     Write-Host ("  created  " + $memDst) -ForegroundColor Green
 }
 # work\templates\ holds the full examples (and the other starting shapes). Never overwritten.
-foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md", "handoff.md", "card.md", "fundamentals.jsonl") {
+foreach ($name in "TASKS.md", "TODAY.md", "MEMORY.md", "handoff.md", "card.md", "progress.md", "ABOUT-ME.md", "FRUSTRATIONS.md", "fundamentals.jsonl") {
     Copy-IfAbsent (Join-Path $tpl $name) (Join-Path $work "templates\$name")
 }
 Copy-IfAbsent (Join-Path $tpl "memory") (Join-Path $work "templates\memory")

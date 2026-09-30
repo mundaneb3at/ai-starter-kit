@@ -76,7 +76,7 @@ than a snippet. Apply this discipline to what you find:
 For each key source, capture: tier (🟢/🟡/🔴), what makes it that tier, the specific detail it
 adds, and the link.
 
-**When a page won't read, that is not evidence either way.** Four fetch traps:
+**When a page won't read, that is not evidence either way.** Five fetch traps:
 - A search engine's summary paragraph is a synthesis, not a source. It blends figures from many
   pages, so linking one result next to a number from it invents an attribution. Open the page and
   find the figure, or mark the claim "from a snippet, not traced to one page".
@@ -88,6 +88,10 @@ adds, and the link.
   description of it. Label the result "my test, <date>, one example".
 - A paper page that a publisher or index blocks can often be read through an open scholarly API,
   which returns the abstract as data.
+- Nothing found in one part of a split document is not proof of absence. Laws, manuals and long
+  reports are often published one part or chapter per page; a search of the wrong part returns
+  nothing and reads as "that section doesn't exist". Find the list of parts first, then search
+  the right part (or each part) before saying something isn't there.
 
 **Load-bearing claims** (about to be baked into code, a config, or a hard-to-reverse decision):
 don't trust one pass. Take each such claim and run a **second, deliberately skeptical pass** —

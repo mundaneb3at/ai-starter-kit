@@ -28,6 +28,8 @@ list this short. Reword a rule rather than adding a sixth._
 - **[Your name]**, [your role — e.g. electrical engineer].
 - Primary workspace: **this folder** (`work\`). All active work lives here.
 - Operating system: **Windows 11**, default shell **PowerShell**. _(Change if yours differs.)_
+- **How I like to work: `ABOUT-ME.md`** at the top of `work\`. Read it at session start. Missing
+  or empty → offer once to fill it in with `skills\about-me\SKILL.md`, then carry on.
 
 ---
 
@@ -67,6 +69,27 @@ never go.
 - **Stay inside the workspace.** Do not add `private\` (or any folder outside
   `work\`) as an extra directory, and do not operate on paths outside `work\`
   unless the user explicitly points you there for a specific task.
+
+### Organizing inside `work\` — so the AI never has to invent
+
+_Five fixed rules. They exist so a fresh session, or a smaller model, finds its way from the
+files alone instead of guessing. The walkthrough that applies them to a messy folder is
+`skills\organize-my-files\SKILL.md`._
+
+1. **Every folder has a job, and one file says what it is.** A `README.md` of 2–5 lines at the
+   top of each project folder: what this is, where to start, how to run or open it. Test: a
+   fresh session can answer "where do I start?" from the README plus at most two more files.
+2. **Status lives in files, not in the AI's memory.** Anything with a lifecycle (a list of
+   applications, documents being processed, steps of a job) keeps `_index\log.md`: one row per
+   item, one status column. "What's done?" is answered by reading that file.
+3. **This file points; it does not carry.** `AGENTS.md` stays short. Long material gets its own
+   file and a link from here.
+4. **Number files only when order matters** (`01_`, `02_`). Otherwise plain names.
+5. **Recovery, not improvisation.** Nothing is deleted or overwritten: it moves to
+   `_archive\YYYY-MM-DD\` at the top of `work\` (one archive, never a new one inside a project). Every multi-step task keeps a `PROGRESS.md` (`templates\progress.md`):
+   one line per step, written before the next step starts. When something goes wrong, read the
+   last checked line of `PROGRESS.md`, take the previous state from `_archive\`, and redo the
+   step from the skill or checklist. Do not design a new fix on the spot.
 
 ### Project layout
 
@@ -135,13 +158,26 @@ This kit also includes reusable **skills** in the `skills\` folder — reference
 always-on behavior: **when a task matches one, read `skills\<name>\SKILL.md` and follow it.**
 Full list + non-redundancy table: `skills\README.md`.
 
+**Follow, don't invent.** If a task has a skill, follow its steps one at a time, in order. If it
+has no skill and takes more than two steps, write the steps as a checklist in `PROGRESS.md`
+first, show it, then do them. A step that fails twice is handed back to the user with the
+`PROGRESS.md`, not worked around.
+
 | If the task is... | Use the skill |
 |---|---|
 | ambiguous / multi-step / hard to undo | `scope-first` |
 | something is broken | `debug-systematically` |
 | about to be called "done" | `verify-before-done` |
 | finishing or pausing a chunk of work | `document-and-handoff` |
-| tidying or restructuring files | `safe-cleanup` |
+| tidying or restructuring files (the safety rules for any move) | `safe-cleanup` |
+| "help me organize my files" / a folder nobody can find their way around | `organize-my-files` |
+| first session, or "you should know this about me" | `about-me` |
+| "where do I start?" / stuck before beginning | `start` |
+| an error, "it's broken", "it won't open" | `fix-a-small-problem` |
+| a letter, email or form to write, or "check this before I send it" | `write-a-document` |
+| a stray thought mid-task: "park this", "note to self" | `parking-lot` |
+| a task needs several answers from the user first, or "ask me questions" | `questionnaire` |
+| "find advice on...", "look this up", a current fact (price, date, rule) | `find-advice` |
 | writing a job for another session to run ("write a card") | `write-a-card` |
 | taking a newer kit release without losing your own changes ("update the kit") | `update-kit` |
 | the user says "close" / "wrap up" / runs `/close` | `document-and-handoff` (handoff + TASKS + memory) |
@@ -175,6 +211,12 @@ missing, carry on without it and offer to create it once. Don't nag._
   (`(Get-Date).AddDays(10)`, `(Get-Date '2026-03-02').DayOfWeek`), never in your head.
 - **TASKS.md is the list; TODAY.md is today's slice of it.** Add new tasks to TASKS.md, never
   only to chat.
+- **Two personal files, written only after a yes:** `ABOUT-ME.md` (how the user works;
+  `skills\about-me`) and `FRUSTRATIONS.md` (what keeps going wrong and what fixed it;
+  `templates\FRUSTRATIONS.md` says how to use it). When the user sounds frustrated or says "note
+  that", search `FRUSTRATIONS.md` first: if the row exists, read out its fix. New → show the
+  proposed row and ask. Never append to either file silently. Either file missing → offer once
+  to create it (columns: `# | Frustration | Status | Fix / proof | Date`); don't nag.
 
 ---
 
@@ -185,8 +227,12 @@ missing, carry on without it and offer to create it once. Don't nag._
 - **Why before how.** A one-line plain-English reason, then the steps.
 - **Flag uncertainty. Never fabricate.** If you're guessing — about a file, a
   command, or a result — say so. A wrong confident answer is worse than "I'm not
-  sure; let me check."
-- **One question at a time.** Don't stack questions.
+  sure; let me check." Mark what you read versus what you assume.
+- **One question at a time.** Don't stack questions. When you do ask, say what is being
+  decided, why now, and what each option means in plain words, so the user can answer without
+  looking anything up.
+- **Never strip a comment or note you did not write.** It was left there for a reason you may
+  not see.
 
 ---
 

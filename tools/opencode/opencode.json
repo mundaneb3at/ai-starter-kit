@@ -5,6 +5,7 @@
       "*": "deny"
     },
     "webfetch": "ask",
+    "websearch": "ask",
     "bash": {
       "*": "allow",
       "rm *": "ask",

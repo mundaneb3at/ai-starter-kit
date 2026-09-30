@@ -7,7 +7,9 @@ session with: "Read cards\YYYY-MM-DD-<slug>.md and run it." How to fill it in:
 
 ## Status
 <!-- The model and effort to run it at (write them out, never "default"), today's date, and the
-state: draft / ready / running / done / stopped. The session running the card updates the state. -->
+state: draft / ready / running / done / stopped. The session running the card updates the state,
+and keeps `cards\YYYY-MM-DD-<slug>-PROGRESS.md` (`templates\progress.md`): one line per Do step,
+written before the next step starts, so a stopped card can be resumed or undone from the file. -->
 
 ## Goal
 <!-- One line: the outcome, not the steps. -->

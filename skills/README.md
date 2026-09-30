@@ -22,6 +22,18 @@ piece of work, with no two overlapping:
 | `companion` | Watch | work is already running and the user wants a second session to watch it and answer questions |
 | `update-kit` | Maintain | a newer kit release is out: update `work\` without losing the user's own changes |
 | `write-a-card` | Hand off | a job should run in another session: decide it's ready, ground it, settle decisions, write `templates\card.md`, check it |
+| `organize-my-files` | Shape | a folder needs a shape a fresh session can find its way around: one step per turn, plan in writing, nothing deleted (`safe-cleanup` has the move rules; this has the walkthrough and the target shape) |
+| `about-me` | Onboard | filling in or updating `ABOUT-ME.md`, the user's own profile, by asking one plain question at a time and saving only after a yes |
+| `start` | Begin | the user is stuck before beginning: name the one smallest first move, then stop |
+| `fix-a-small-problem` | Fix | a small everyday problem (an error, a program that won't open): one check per turn, the user pastes each result, a help request after two failed tries (`debug-systematically` is the deeper method for code) |
+| `write-a-document` | Write | a letter, email or form answer from the user's notes, every fact checked against the thread they paste; blanks instead of guesses; never sends |
+| `parking-lot` | Focus | a stray thought mid-task: one line in `notes\parking-lot.md`, then straight back to the task |
+| `questionnaire` | Ask | a task needs several answers from the user: read their files first, ask only what is missing, three at a time, each with a recommendation (`grill-me` pressure-tests a plan; this collects facts and wishes) |
+| `find-advice` | Look up | advice or a current fact from the web: OpenCode's built-in `websearch`, every point quoted with its page (`primary-source` goes deeper when a decision rests on it) |
+
+The last eight rows (`organize-my-files` to `find-advice`) end with a *Tested with* line: each was
+run on OpenCode 1.18.32 with `opencode-go/deepseek-v4.1-flash` on 2026-09-30, and none was tested on
+other systems (Claude Code, Codex, other models).
 
 ## How to use them
 
@@ -34,4 +46,4 @@ piece of work, with no two overlapping:
 - **To remove one:** delete its folder (or archive it). Nothing else references
   it except the table in `AGENTS.md`.
 
-These twelve are a starting set. Grow them as patterns repeat in your own work.
+These twenty-one are a starting set. Grow them as patterns repeat in your own work.

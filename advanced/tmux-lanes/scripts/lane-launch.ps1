@@ -6,7 +6,7 @@
 #   ... -DryRun                                         # print the checks and the plan, create nothing
 #
 # Refuses (exit 2, nothing created): a card with no DONE-WHEN block, a card whose DONE-WHEN paths all exist already,
-# a session name that already exists.
+# a session name that already exists, an elevated (admin) shell (override: -AllowElevated).
 # Shape: one session per lane. Window 0 = a plain shell (so you can attach and look around). Window 1 = the lane.
 # Two-stage start: window 1 runs THIS script again with -Run -LaunchFile <json>. The first message, the card path and
 # any extra flags travel in that JSON file, never on the tmux command line (quotes and slashes get mangled there).
@@ -29,6 +29,7 @@ param(
   [string[]] $ClaudeArgs = @(),
   [string]   $StateDir = $(if ($env:LANE_STATE_DIR) { $env:LANE_STATE_DIR } else { Join-Path $env:TEMP 'tmux-lanes' }),
   [switch]   $DryRun,
+  [switch]   $AllowElevated,           # launch from an admin shell anyway (the lane will be invisible to normal shells)
   [switch]   $Run,                     # internal: we ARE window 1
   [string]   $LaunchFile = ''          # internal: the JSON written by the launch stage
 )
@@ -66,6 +67,9 @@ if ($Run) {
 }
 
 # --- launch stage ---------------------------------------------------------------------------------------------------
+# An elevated (admin) shell starts a psmux server that normal shells, and so the watcher, cannot reach. LANE_ASSUME_ELEVATED=1 is the selftest seam.
+$elevated = ($env:LANE_ASSUME_ELEVATED -eq '1') -or ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($elevated -and -not $AllowElevated) { Write-Host 'refused: this is an elevated (admin) shell - its tmux server is invisible to the watcher and to every normal shell. Launch from a normal PowerShell, or pass -AllowElevated'; exit 2 }
 if (-not $Model -or -not $Effort) { Write-Host 'refused: pass -Model and -Effort (for example -Model sonnet -Effort medium); a lane never runs on a silent default'; exit 2 }
 if (-not $Card -or -not (Test-Path -LiteralPath $Card)) { Write-Host "refused: card not found: $Card"; exit 2 }
 $CardPath = (Resolve-Path -LiteralPath $Card).Path

@@ -7,6 +7,56 @@ semantic versions: a later date is a newer kit.
 Your install records the release it came from in `work\KIT-VERSION.txt`. To update, read every
 entry above that version, then follow "Updating this kit" in `README.md`.
 
+## [Unreleased]
+
+## [v2026.09.30] - 2026-09-30
+
+Stages 1 and 2 of the "least inventing" work: rules, files and six everyday skills so a smaller
+model helping a beginner follows written steps instead of improvising, and so a fresh session can
+put things back together from the files when a step went wrong. Also two safety guards for
+`advanced\tmux-lanes`.
+
+### Added
+- `AGENTS.md` § "Organizing inside `work\`": five fixed rules (a README in every project folder,
+  status in `_index\log.md` files, this file points and does not carry, numbers only where order
+  matters, recovery from `_archive\` + `PROGRESS.md` instead of improvising), and a "Follow,
+  don't invent" rule under Workflows and skills.
+- `templates\progress.md`: a per-task log, one line per step written before the next step
+  starts. `templates\card.md` Status and `document-and-handoff` now name it.
+- `skills\organize-my-files`: give a messy folder a fixed shape, one step per turn, plan in
+  writing before any move, nothing deleted. `safe-cleanup` keeps the move rules.
+- `skills\about-me` + `templates\ABOUT-ME.md`: the user's own profile (how they learn, how they
+  like answers), filled by one plain question at a time, saved only after a yes.
+- `templates\FRUSTRATIONS.md`: what keeps going wrong and what fixed it, with a dedupe-first rule
+  so solved things are not re-raised. Both personal files are gitignored and placed blank in
+  `work\` by `setup.ps1`.
+- Stage 2, six everyday skills, each one step per turn and written for a smaller model:
+  `start` (the one smallest first move, then stop), `fix-a-small-problem` (one check per turn,
+  the user pastes each result, a paste-ready help request after two failed tries),
+  `write-a-document` (letter / email / form from the user's notes, blanks instead of guesses,
+  every fact quoted against the thread the user pastes, never sends), `parking-lot` (a stray
+  thought goes to `notes\parking-lot.md` in one line; asks before creating the file),
+  `questionnaire` (read the user's files first, ask only what is missing, three at a time, each
+  with a recommendation; ends with confirmed / unconfirmed / gaps), `find-advice` (OpenCode's
+  built-in `websearch`, no key needed; every point quoted with its page).
+- `tools\opencode\opencode.json`: `"websearch": "ask"`, the same ask-first posture as `webfetch`.
+
+### Changed
+- `AGENTS.md` § How to collaborate: mark read vs assumed; a question says what is decided, why
+  now, and what each option means; never strip a note you did not write.
+- Skill count 13 → 21 in `README.md` and `skills\README.md`.
+- `primary-source`: a fifth fetch trap, "nothing found in one part of a split document is not
+  proof of absence" (laws and manuals published one part per page).
+- `organize-my-files`, `about-me` and the six Stage 2 skills end with a *Tested with* line: run on
+  OpenCode 1.18.32 with `opencode-go/deepseek-v4.1-flash` on 2026-09-30. Not tested on other
+  systems (Claude Code, Codex, other models).
+- `advanced\tmux-lanes`: `lane-launch.ps1` and `lane-watch.ps1` now refuse to run from an elevated
+  (admin) shell (`-AllowElevated` overrides), because lanes started there are invisible to the watcher;
+  `lane-watch.ps1` keeps a lock so a second watcher on the same state folder is refused; `selftest.ps1`
+  checks both guards. `README.md` and `ARCHITECTURE.md` add: read a lane's served model by timestamp
+  (the close sequence can run on another model), and mark the heartbeat stale when a watcher exits if
+  you add an idle exit plus an auto-start.
+
 ## [v2026.09.29.3] - 2026-09-29
 
 ### Changed

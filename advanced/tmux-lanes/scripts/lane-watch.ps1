@@ -6,6 +6,9 @@
 #   ... -DryRun                                                                     # log what it would do, send nothing
 #   ... -DetachAs lanewatch     # start the loop in its own detached tmux session (name must not start with your lane prefix)
 #   Stop the loop: create the file <StateDir>\STOP (it is removed when the loop honours it).
+# One watcher per state folder: the loop takes <StateDir>\watcher.lock ("<pid> <start ticks>") and a second one is refused.
+# A watcher closes EVERY lane that declares done in its state folder, not only the ones you launched it for.
+# Refused from an elevated (admin) shell: its tmux server is invisible to normal shells (override: -AllowElevated).
 #
 # Per declaration:
 #   session gone             -> archived to done\closed, logged GONE
@@ -28,12 +31,24 @@ param(
   [string[]] $CloseCommands = @('/exit'),
   [switch]   $Once,
   [string]   $DetachAs = '',          # start this loop in a new detached tmux session of that name, then return
-  [switch]   $DryRun
+  [switch]   $DryRun,
+  [switch]   $AllowElevated           # run from an admin shell anyway (it will not see lanes started from normal shells)
 )
 $tmux = (Get-Command tmux -ErrorAction SilentlyContinue).Source
 if (-not $tmux) { $tmux = Get-ChildItem "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\marlocarlo.psmux_*\tmux.exe" -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty FullName }
 if (-not $tmux) { Write-Host 'tmux (psmux) not found - winget install marlocarlo.psmux'; exit 3 }
+# LANE_ASSUME_ELEVATED=1 is the selftest seam.
+$elevated = ($env:LANE_ASSUME_ELEVATED -eq '1') -or ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($elevated -and -not $AllowElevated) { Write-Host 'refused: this is an elevated (admin) shell - its tmux server is invisible to normal shells and their lanes. Run the watcher from a normal PowerShell, or pass -AllowElevated'; exit 2 }
+# lock = "<pid> <process start ticks>"; the ticks stop a recycled pid from looking alive. A killed watcher leaves a stale lock, taken over next start.
+$lockFile = Join-Path $StateDir 'watcher.lock'
+function Test-LockHeld {
+  $p = @((Get-Content -LiteralPath $lockFile -ErrorAction SilentlyContinue) -split ' ')
+  $h = if ($p.Count -eq 2) { Get-Process -Id $p[0] -ErrorAction SilentlyContinue }
+  return [bool]($h -and $h.StartTime.Ticks -eq [int64]$p[1])
+}
 if ($DetachAs) {
+  if (Test-LockHeld) { Write-Host "refused: a watcher already holds $lockFile (one per state folder)"; exit 2 }
   & $tmux has-session -t $DetachAs 2>$null
   if ($LASTEXITCODE -eq 0) { Write-Host "refused: tmux session '$DetachAs' already exists"; exit 2 }
   # -EncodedCommand: psmux drops inner double quotes, so a quoted path with a space would split in two
@@ -53,6 +68,13 @@ $doneWhen = Join-Path $PSScriptRoot 'done-when.ps1'
 $Glyph = [string][char]0x276F   # Claude Code's input prompt character
 
 New-Item -ItemType Directory -Force -Path $StateDir | Out-Null
+$locked = $false
+if (-not $Once -and -not $DryRun) {
+  # ponytail: check-then-write, so two starts in the same instant can both pass; a real mutex if that ever bites
+  if (Test-LockHeld) { Write-Host "refused: a watcher already holds $lockFile (one per state folder)"; exit 2 }
+  Set-Content -LiteralPath $lockFile -Value "$PID $((Get-Process -Id $PID).StartTime.Ticks)" -Encoding ascii
+  $locked = $true
+}
 function Write-Log([string]$s) {
   $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [watch] $s"
   Write-Host $line
@@ -135,4 +157,5 @@ while ($true) {
   if ($Once) { break }
   Start-Sleep -Seconds $IntervalSeconds
 }
+if ($locked) { Remove-Item -LiteralPath $lockFile -Force -ErrorAction SilentlyContinue }
 exit 0
