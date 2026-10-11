@@ -1,5 +1,11 @@
 # ai-starter-kit
 
+![A real run of setup.ps1 -Tool none: it creates work\ and private\, then places the rules, skills and tracking files](assets/readme/hero.png)
+
+- **What:** an AI-agnostic starter kit for building things with an AI coding assistant on Windows.
+- **How:** `setup.ps1` builds `work\` (where your AI runs) and `private\` (outside it), then places the rules, skills and tracking files.
+- **Run:** `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -Tool claude` (or `codex`, `opencode`, `both`, `none`).
+
 A small starter kit for "vibe coding" (building things by describing what you want to an AI
 assistant) on a fresh Windows machine. It is **AI-agnostic**: it works with several AI coding
 tools, not one. It sets up three things:
@@ -68,6 +74,8 @@ name. `skills\README.md` has the full table.
 ---
 
 ## The mental model in 30 seconds
+
+![What setup.ps1 builds: work\ holds AGENTS.md, skills, tracking files, projects, archive and handoffs; private\ sits outside it](assets/readme/how-it-works.png)
 
 ```
 <Base>\                      (default: Desktop)
